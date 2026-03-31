@@ -1,0 +1,31 @@
+let tg = window.Telegram.WebApp;
+
+// Разворачиваем приложение на весь экран Телеграма
+tg.expand(); 
+
+let energyCount = document.getElementById('energy-count');
+let batteryBtn = document.getElementById('battery-button');
+let labelEnergy = document.getElementById('label-energy');
+
+// Автоматическая двуязычность: читаем язык прямо из Телеграма пользователя
+let userLang = tg.initDataUnsafe?.user?.language_code || 'en';
+
+if (userLang === 'ru' || userLang === 'uk' || userLang === 'be') {
+    labelEnergy.innerText = "ЭНЕРГИЯ";
+} else {
+    labelEnergy.innerText = "ENERGY";
+}
+
+// Логика клика 
+let currentEnergy = 0;
+
+batteryBtn.addEventListener('click', () => {
+    currentEnergy += 1;
+    energyCount.innerText = currentEnergy;
+    
+    // Включаем тактильную отдачу (вибрацию) при тапе
+    tg.HapticFeedback.impactOccurred('light');
+});
+
+// Сообщаем Телеграму, что приложение готово к работе
+tg.ready();
