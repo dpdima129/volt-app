@@ -8,7 +8,6 @@
     
     <style>
         body {
-            /* Крутой радиальный градиент на фоне */
             background: radial-gradient(circle at center, #2a2a35 0%, #101014 100%);
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,8 +17,8 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* Убираем скролл */
-            user-select: none; /* Запрещаем выделять текст при тапах */
+            overflow: hidden;
+            user-select: none;
             -webkit-user-select: none;
         }
         .header {
@@ -39,7 +38,6 @@
         #battery-button {
             width: 220px;
             height: 220px;
-            /* Золото-оранжевая кнопка-монета */
             background: linear-gradient(135deg, #ffdd00, #ff8c00);
             border-radius: 50%;
             border: 6px solid #fff;
@@ -51,15 +49,12 @@
             justify-content: center;
             transition: transform 0.05s;
             position: relative;
-            /* Убираем синее выделение при клике на телефонах */
             -webkit-tap-highlight-color: transparent; 
         }
-        /* Эффект вдавливания при клике */
         #battery-button:active {
             transform: scale(0.92);
             box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
         }
-        /* Стили для вылетающих цифр +1 */
         .floating-number {
             position: absolute;
             font-size: 28px;
@@ -74,6 +69,14 @@
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
+        
+        /* Стили для индикатора загрузки (чтобы было видно, что игра коннектится к серверу) */
+        #loading-status {
+            font-size: 14px;
+            color: #aaaaaa;
+            margin-top: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -85,44 +88,64 @@
     </div>
 
     <div id="battery-button">⚡️</div>
+    
+    <div id="loading-status">Синхронизация с сервером...</div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // На весь экран
+        tg.expand();
         
         let energyCount = document.getElementById('energy-count');
         let batteryBtn = document.getElementById('battery-button');
+        let statusText = document.getElementById('loading-status');
         
         let currentEnergy = 0;
+        let isDataLoaded = false; 
 
-        // Используем 'pointerdown' вместо 'click' — он срабатывает моментально на телефонах!
+        // 1. ЗАГРУЗКА БАЛАНСА ПРИ ОТКРЫТИИ ИГРЫ
+        // Обращаемся к облаку Телеграма за сохраненными монетами
+        tg.CloudStorage.getItem('volt_score', (err, value) => {
+            if (!err && value) {
+                currentEnergy = parseInt(value); // Переводим текст в число
+                energyCount.innerText = currentEnergy;
+            }
+            isDataLoaded = true; // Разрешаем тапать только после проверки баланса
+            statusText.innerText = "Готово!";
+            setTimeout(() => statusText.innerText = "", 2000); // Прячем надпись через 2 сек
+        });
+
+        // 2. ЛОГИКА ТАПОВ
         batteryBtn.addEventListener('pointerdown', (e) => {
+            if (!isDataLoaded) return; // Защита от накрутки до загрузки базы
+
             currentEnergy += 1;
             energyCount.innerText = currentEnergy;
-            
-            // Вибрация Телеграма
             tg.HapticFeedback.impactOccurred('medium');
 
-            // --- Логика вылетающей цифры +1 ---
             const plusOne = document.createElement('div');
             plusOne.classList.add('floating-number');
             plusOne.innerText = '+1';
             
-            // Определяем, куда именно ты тапнул пальцем, чтобы цифра летела оттуда
             const rect = batteryBtn.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            plusOne.style.left = `${x}px`;
-            plusOne.style.top = `${y}px`;
+            plusOne.style.left = `${e.clientX - rect.left}px`;
+            plusOne.style.top = `${e.clientY - rect.top}px`;
             
             batteryBtn.appendChild(plusOne);
 
-            // Удаляем цифру из памяти через 800 миллисекунд (когда закончится анимация)
             setTimeout(() => {
                 plusOne.remove();
             }, 800);
         });
+
+        // 3. АВТОСОХРАНЕНИЕ В ОБЛАКО
+        // Сохраняем баланс каждые 3 секунды. 
+        // Не делаем это при каждом тапе, чтобы Телеграм не заблокировал нас за спам запросами!
+        setInterval(() => {
+            if (isDataLoaded) {
+                // В облако можно сохранять только текст (строки), поэтому переводим число в строку
+                tg.CloudStorage.setItem('volt_score', currentEnergy.toString());
+            }
+        }, 3000);
 
         tg.ready();
     </script>
