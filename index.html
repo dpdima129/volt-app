@@ -1,77 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Volt Token</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
         body {
-            background-color: var(--tg-theme-bg-color, #1e1e1e);
-            color: var(--tg-theme-text-color, #ffffff);
-            font-family: sans-serif;
+            /* Крутой радиальный градиент на фоне */
+            background: radial-gradient(circle at center, #2a2a35 0%, #101014 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden; /* Убираем скролл */
+            user-select: none; /* Запрещаем выделять текст при тапах */
+            -webkit-user-select: none;
+        }
+        .header {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+        }
+        .score-container {
+            font-size: 56px;
+            font-weight: bold;
+            margin-bottom: 50px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
         #battery-button {
+            width: 220px;
+            height: 220px;
+            /* Золото-оранжевая кнопка-монета */
+            background: linear-gradient(135deg, #ffdd00, #ff8c00);
+            border-radius: 50%;
+            border: 6px solid #fff;
+            box-shadow: 0 0 50px rgba(255, 140, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.6);
             font-size: 80px;
-            background: none;
-            border: none;
             cursor: pointer;
-            margin-top: 30px;
-            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.05s;
+            position: relative;
+            /* Убираем синее выделение при клике на телефонах */
+            -webkit-tap-highlight-color: transparent; 
         }
+        /* Эффект вдавливания при клике */
         #battery-button:active {
-            transform: scale(0.9);
+            transform: scale(0.92);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
         }
-        .stats {
+        /* Стили для вылетающих цифр +1 */
+        .floating-number {
+            position: absolute;
             font-size: 28px;
             font-weight: bold;
+            color: #ffffff;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            animation: floatUp 0.8s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
         }
     </style>
 </head>
 <body>
 
-    <h2>Volt Token ⚡️</h2>
-    <div class="stats">
-        <span id="label-energy">ENERGY</span>: <span id="energy-count">0</span>
+    <div class="header">VOLT TOKEN</div>
+    
+    <div class="score-container">
+        <span id="energy-count">0</span>
     </div>
-    <button id="battery-button">🔋</button>
+
+    <div id="battery-button">⚡️</div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        
-        // Разворачиваем приложение на весь экран Телеграма
-        tg.expand();
+        tg.expand(); // На весь экран
         
         let energyCount = document.getElementById('energy-count');
         let batteryBtn = document.getElementById('battery-button');
-        let labelEnergy = document.getElementById('label-energy');
         
-        // Автоматическая двуязычность
-        let userLang = tg.initDataUnsafe?.user?.language_code || 'en';
-        if (userLang === 'ru' || userLang === 'uk' || userLang === 'be') {
-            labelEnergy.innerText = "ЭНЕРГИЯ";
-        } else {
-            labelEnergy.innerText = "ENERGY";
-        }
-        
-        // Логика клика
         let currentEnergy = 0;
-        batteryBtn.addEventListener('click', () => {
+
+        // Используем 'pointerdown' вместо 'click' — он срабатывает моментально на телефонах!
+        batteryBtn.addEventListener('pointerdown', (e) => {
             currentEnergy += 1;
             energyCount.innerText = currentEnergy;
             
-            // Включаем тактильную отдачу при тапе
-            tg.HapticFeedback.impactOccurred('light');
+            // Вибрация Телеграма
+            tg.HapticFeedback.impactOccurred('medium');
+
+            // --- Логика вылетающей цифры +1 ---
+            const plusOne = document.createElement('div');
+            plusOne.classList.add('floating-number');
+            plusOne.innerText = '+1';
+            
+            // Определяем, куда именно ты тапнул пальцем, чтобы цифра летела оттуда
+            const rect = batteryBtn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            plusOne.style.left = `${x}px`;
+            plusOne.style.top = `${y}px`;
+            
+            batteryBtn.appendChild(plusOne);
+
+            // Удаляем цифру из памяти через 800 миллисекунд (когда закончится анимация)
+            setTimeout(() => {
+                plusOne.remove();
+            }, 800);
         });
-        
-        // Сообщаем Телеграму, что приложение готово к работе
+
         tg.ready();
     </script>
 </body>
