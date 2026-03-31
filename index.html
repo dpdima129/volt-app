@@ -1,31 +1,78 @@
-let tg = window.Telegram.WebApp;
-
-// Разворачиваем приложение на весь экран Телеграма
-tg.expand(); 
-
-let energyCount = document.getElementById('energy-count');
-let batteryBtn = document.getElementById('battery-button');
-let labelEnergy = document.getElementById('label-energy');
-
-// Автоматическая двуязычность: читаем язык прямо из Телеграма пользователя
-let userLang = tg.initDataUnsafe?.user?.language_code || 'en';
-
-if (userLang === 'ru' || userLang === 'uk' || userLang === 'be') {
-    labelEnergy.innerText = "ЭНЕРГИЯ";
-} else {
-    labelEnergy.innerText = "ENERGY";
-}
-
-// Логика клика (пока визуальная)
-let currentEnergy = 0;
-
-batteryBtn.addEventListener('click', () => {
-    currentEnergy += 1;
-    energyCount.innerText = currentEnergy;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volt Token</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    // Включаем тактильную отдачу (вибрацию) при тапе
-    tg.HapticFeedback.impactOccurred('light');
-});
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #1e1e1e);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #battery-button {
+            font-size: 80px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.1s;
+        }
+        #battery-button:active {
+            transform: scale(0.9);
+        }
+        .stats {
+            font-size: 28px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
 
-// Сообщаем Телеграму, что приложение готово к работе
-tg.ready();
+    <h2>Volt Token ⚡️</h2>
+    <div class="stats">
+        <span id="label-energy">ENERGY</span>: <span id="energy-count">0</span>
+    </div>
+    <button id="battery-button">🔋</button>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        
+        // Разворачиваем приложение на весь экран Телеграма
+        tg.expand();
+        
+        let energyCount = document.getElementById('energy-count');
+        let batteryBtn = document.getElementById('battery-button');
+        let labelEnergy = document.getElementById('label-energy');
+        
+        // Автоматическая двуязычность
+        let userLang = tg.initDataUnsafe?.user?.language_code || 'en';
+        if (userLang === 'ru' || userLang === 'uk' || userLang === 'be') {
+            labelEnergy.innerText = "ЭНЕРГИЯ";
+        } else {
+            labelEnergy.innerText = "ENERGY";
+        }
+        
+        // Логика клика
+        let currentEnergy = 0;
+        batteryBtn.addEventListener('click', () => {
+            currentEnergy += 1;
+            energyCount.innerText = currentEnergy;
+            
+            // Включаем тактильную отдачу при тапе
+            tg.HapticFeedback.impactOccurred('light');
+        });
+        
+        // Сообщаем Телеграму, что приложение готово к работе
+        tg.ready();
+    </script>
+</body>
+</html>
