@@ -3,197 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Volt Token | Premium Presale</title>
+    <title>Volt AI | Transparent Presale</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --volt-primary: #ffae00; --volt-dark: #ff8c00; --bg-color: #030305; --card-bg: rgba(15, 15, 18, 0.75); --glow: rgba(255, 174, 0, 0.4); }
+        :root { --volt: #ffae00; --bg: #030305; --glass: rgba(15, 15, 18, 0.8); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-color); background-image: radial-gradient(circle at 50% -20%, rgba(255, 174, 0, 0.1) 0%, transparent 50%); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        @keyframes lightning { 0%, 95%, 98% { background-color: transparent; } 96%, 99% { background-color: rgba(255, 174, 0, 0.05); } 100% { background-color: transparent; } }
-        body::after { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: -1; animation: lightning 7s infinite; }
         
-        .header { width: 100%; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; max-width: 500px; }
-        .logo { font-weight: 900; font-size: 22px; display: flex; align-items: center; letter-spacing: -0.5px; }
-        .logo span { color: var(--volt-primary); text-shadow: 0 0 15px var(--glow); }
-        .status-tag { background: rgba(255,174,0,0.1); color: var(--volt-primary); padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,174,0,0.3); box-shadow: 0 0 15px rgba(255,174,0,0.15); }
-        
-        .main-card { width: 92%; max-width: 450px; background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; padding: 28px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); margin-top: 10px; position: relative; overflow: hidden; }
-        .personal-card { background: linear-gradient(145deg, rgba(20,20,25,1) 0%, rgba(10,10,12,1) 100%); border: 1px solid rgba(255,174,0,0.2); border-radius: 24px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 20px rgba(255,174,0,0.05); }
-        .personal-card div { display: flex; flex-direction: column; gap: 6px; }
-        .p-val { color: var(--volt-primary); font-size: 18px; font-weight: 900; text-shadow: 0 0 10px var(--glow); }
-        
-        .stats-row { display: flex; justify-content: space-between; margin: 0 0 25px 0; }
-        .stat-box { display: flex; flex-direction: column; gap: 6px; }
-        .stat-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-value { font-size: 24px; font-weight: 900; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 0; 
+            display: flex; flex-direction: column; align-items: center;
+            background-image: radial-gradient(circle at 50% -20%, rgba(255, 174, 0, 0.15) 0%, transparent 60%);
+        }
 
+        /* Эффект мерцания электричества по краям */
+        .main-card { 
+            width: 92%; max-width: 450px; background: var(--glass); 
+            border: 1px solid rgba(255, 174, 0, 0.2); border-radius: 32px; 
+            padding: 30px 24px; box-shadow: 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(255, 174, 0, 0.05);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            margin-top: 20px; position: relative;
+        }
+
+        .header { width: 100%; padding: 25px; display: flex; justify-content: space-between; align-items: center; max-width: 500px; }
+        .logo { font-weight: 900; font-size: 24px; letter-spacing: -1px; }
+        .logo span { color: var(--volt); text-shadow: 0 0 15px rgba(255,174,0,0.5); }
+
+        .personal-card { 
+            background: rgba(255, 174, 0, 0.03); border: 1px solid rgba(255,174,0,0.15);
+            border-radius: 24px; padding: 20px; margin-bottom: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .p-val { color: var(--volt); font-size: 20px; font-weight: 900; }
+
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .stat-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .stat-value { font-size: 22px; font-weight: 900; }
+
+        /* Прогресс-бар */
         .progress-container { margin-bottom: 30px; }
-        .progress-labels { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: #aaa; font-weight: 600;}
-        .bar-bg { background: #111; border: 1px solid #333; height: 16px; border-radius: 100px; position: relative; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-        .bar-fill { background: linear-gradient(90deg, var(--volt-dark), var(--volt-primary)); width: 0%; height: 100%; border-radius: 100px; box-shadow: 0 0 20px var(--volt-primary); transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-        .bar-fill::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shine 2.5s infinite; }
-        @keyframes shine { 100% { left: 200%; } }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: #aaa; font-weight: 600; }
+        .bar-bg { background: #111; height: 16px; border-radius: 100px; overflow: hidden; border: 1px solid #222; }
+        .bar-fill { 
+            background: linear-gradient(90deg, #ff8c00, #ffae00); width: 0%; height: 100%; 
+            box-shadow: 0 0 20px rgba(255,174,0,0.4); transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        .input-group { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 24px; margin-bottom: 15px; text-align: center; }
-        .wallet-addr { font-family: monospace; font-size: 13px; color: #00ffaa; word-break: break-all; margin: 15px 0; display: block; background: #050505; padding: 14px; border-radius: 12px; border: 1px dashed #333; user-select: all; text-shadow: 0 0 5px rgba(0,255,170,0.3); }
-        .tx-input { width: 100%; background: #050505; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 16px; margin: 15px 0; font-family: monospace; font-size: 13px; outline: none; transition: 0.3s; }
-        .tx-input:focus { border-color: var(--volt-primary); box-shadow: 0 0 15px rgba(255,174,0,0.2); }
+        .payment-zone { background: #000; border: 1px solid #222; border-radius: 24px; padding: 20px; text-align: center; margin-top: 15px; display: none; }
+        .wallet-addr { font-family: monospace; font-size: 12px; color: #00ffaa; display: block; background: #111; padding: 12px; border-radius: 12px; margin: 15px 0; border: 1px dashed #333; }
+        
+        .tx-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 16px; margin-bottom: 15px; outline: none; }
+        .tx-input:focus { border-color: var(--volt); }
 
-        .btn-main { background: #fff; color: #000; border: none; width: 100%; padding: 20px; border-radius: 20px; font-size: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: 0.2s; position: relative; overflow: hidden; }
-        .btn-main:active { transform: scale(0.97); }
-        .btn-success { background: linear-gradient(90deg, #00ffaa, #00cc88); color: #000; box-shadow: 0 0 20px rgba(0,255,170,0.3); }
+        .btn-main { 
+            background: #fff; color: #000; border: none; width: 100%; padding: 20px; 
+            border-radius: 20px; font-size: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-verify { background: linear-gradient(90deg, #00ffaa, #00cc88); margin-top: 10px; }
 
-        .live-tx { width: 92%; max-width: 450px; margin-top: 30px; padding-bottom: 40px;}
-        .tx-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;}
-        .dot { width: 8px; height: 8px; background: #00ffaa; border-radius: 50%; box-shadow: 0 0 10px #00ffaa; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; box-shadow: none; } }
-        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.02); border-radius: 16px; margin-bottom: 10px; font-size: 13px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .tx-user { color: #aaa; font-family: monospace; }
-        .tx-amt { color: #00ffaa; font-weight: 900; font-size: 15px; text-shadow: 0 0 10px rgba(0,255,170,0.2); }
+        .live-tx-empty { text-align: center; padding: 30px; color: #444; font-size: 13px; border: 1px dashed #222; border-radius: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="logo">VOLT<span>AI</span></div>
-        <div class="status-tag" id="phase-badge">Phase 1 Live</div>
+        <div class="status-tag" style="font-size: 11px; font-weight: 800; color: var(--volt);">● ON-CHAIN VERIFIED</div>
     </div>
 
     <div class="main-card">
         <div class="personal-card">
-            <div>
-                <span class="stat-label">Your Allocation</span>
-                <span class="p-val" id="my-volt">0.00 VOLT</span>
-            </div>
-            <div style="text-align: right;">
-                <span class="stat-label">Total Invested</span>
-                <span style="color: #fff; font-weight: 900; font-size: 16px;" id="my-usd">0.00 USDT</span>
-            </div>
+            <div><span class="stat-label">Your Allocation</span><span class="p-val" id="my-volt">0.00 VOLT</span></div>
+            <div style="text-align: right;"><span class="stat-label">Invested</span><span id="my-usd" style="font-weight: 900;">0.00 USDT</span></div>
         </div>
 
         <div class="stats-row">
             <div class="stat-box">
-                <span class="stat-label">Price per VOLT</span>
-                <span class="stat-value" id="current-price">0.010 USDT</span>
+                <span class="stat-label">Current Phase</span>
+                <span class="stat-value" id="phase-num">Phase 1</span>
             </div>
             <div class="stat-box" style="text-align: right;">
                 <span class="stat-label">Total Raised</span>
-                <span class="stat-value" style="color: var(--volt-primary); text-shadow: 0 0 15px var(--glow);" id="total-raised">0 USDT</span>
+                <span class="stat-value" id="total-raised" style="color: var(--volt);">0.00 USDT</span>
             </div>
         </div>
 
         <div class="progress-container">
-            <div class="progress-labels">
-                <span id="percent-text">0% Sold</span>
-                <span id="goal-text">Goal: 0 USDT</span>
-            </div>
+            <div class="progress-labels"><span id="percent-text">0.0% Sold</span><span id="goal-text">Goal: 50,000 USDT</span></div>
             <div class="bar-bg"><div class="bar-fill" id="progress-bar"></div></div>
         </div>
 
-        <div id="payment-zone" style="display: none; animation: slideUp 0.3s ease-out;">
-            <div class="input-group">
-                <span class="stat-label" style="color: #fff;">1. Transfer USDT (TRC20) to:</span>
-                <span class="wallet-addr">TDMdmJJriad71a4tHYCqruLggtীবtJZ8gz1Lc</span>
-                <p style="font-size: 11px; color: #888; margin: 0 0 20px 0;">Minimum deposit: 5 USDT</p>
-                <span class="stat-label" style="color: #fff;">2. Verify Transaction</span>
-                <input type="text" id="tx-hash" class="tx-input" placeholder="Paste TxID (Hash) here...">
-                <button class="btn-main btn-success" onclick="submitHash()">VERIFY PAYMENT</button>
-            </div>
+        <div id="payment-area" class="payment-zone">
+            <span class="stat-label">Send USDT (TRC20) to:</span>
+            <span class="wallet-addr">TDMdmJJriad71a4tHYCqruLggtJZ8gz1Lc</span>
+            <input type="text" id="tx-hash" class="tx-input" placeholder="Paste TxID (Hash) here">
+            <button class="btn-main btn-verify" onclick="submitTx()">Verify Transaction</button>
         </div>
 
-        <button class="btn-main" id="buy-btn" onclick="showPayment()">Buy VOLT Allocation</button>
+        <button class="btn-main" id="buy-btn" onclick="showPay()">Participate in Presale</button>
     </div>
 
-    <div class="live-tx">
-        <div class="tx-title"><div class="dot"></div> Live Network Activity</div>
-        <div id="tx-feed"></div>
+    <div style="width: 92%; max-width: 450px; margin-top: 25px;">
+        <span class="stat-label">Network Status</span>
+        <div class="live-tx-empty">Waiting for new on-chain transactions...</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.headerColor = '#030305';
-        tg.backgroundColor = '#030305';
 
-        const urlParams = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
+        const raised = parseFloat(params.get('raised') || 0);
+        const goal = parseFloat(params.get('goal') || 50000);
+        const phase = params.get('phase') || 1;
         
-        const myUsd = parseFloat(urlParams.get('usd') || 0);
-        const myVolt = parseFloat(urlParams.get('volt') || 0);
-        const membersCount = parseInt(urlParams.get('m') || 5); // Получаем кол-во людей в группе от бота!
+        // Личные данные юзера
+        document.getElementById('my-volt').innerText = parseFloat(params.get('volt') || 0).toFixed(2) + ' VOLT';
+        document.getElementById('my-usd').innerText = parseFloat(params.get('usd') || 0).toFixed(2) + ' USDT';
 
-        document.getElementById('my-usd').innerText = myUsd.toFixed(2) + ' USDT';
-        document.getElementById('my-volt').innerText = myVolt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' VOLT';
+        // Данные блокчейна
+        document.getElementById('total-raised').innerText = raised.toFixed(2) + ' USDT';
+        document.getElementById('phase-num').innerText = 'Phase ' + phase;
+        document.getElementById('goal-text').innerText = 'Goal: ' + goal.toLocaleString() + ' USDT';
 
-        const phase = urlParams.get('phase') || 1;
-        const price = parseFloat(urlParams.get('price') || 0.010);
-        const raised = parseFloat(urlParams.get('raised') || 12500);
-        const goal = parseFloat(urlParams.get('goal') || 50000);
-
-        document.getElementById('phase-badge').innerText = `Phase ${phase} Live`;
-        document.getElementById('current-price').innerText = price.toFixed(4) + ' USDT';
-        document.getElementById('total-raised').innerText = raised.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' USDT';
-        document.getElementById('goal-text').innerText = 'Goal: ' + goal.toLocaleString('en-US') + ' USDT';
-
+        // Прогресс
+        let pct = (raised / goal) * 100;
         setTimeout(() => {
-            let percent = (raised / goal) * 100;
-            if(percent > 100) percent = 100;
-            document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('percent-text').innerText = percent.toFixed(1) + '% Sold';
-        }, 500);
+            document.getElementById('progress-bar').style.width = (pct > 100 ? 100 : pct) + '%';
+            document.getElementById('percent-text').innerText = pct.toFixed(1) + '% Sold';
+        }, 300);
 
-        function showPayment() {
-            document.getElementById('payment-zone').style.display = 'block';
+        function showPay() {
+            document.getElementById('payment-area').style.display = 'block';
             document.getElementById('buy-btn').style.display = 'none';
-            tg.HapticFeedback.impactOccurred('heavy');
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
-        function submitHash() {
-            let hash = document.getElementById('tx-hash').value.trim();
-            if(hash.length < 10) {
-                tg.HapticFeedback.notificationOccurred('error');
-                alert("Please enter a valid Transaction Hash (TxID)!");
-                return;
-            }
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.sendData("txid:" + hash);
+        function submitTx() {
+            let h = document.getElementById('tx-hash').value.trim();
+            if(h.length < 10) return alert("Enter TxID");
+            tg.sendData("txid:" + h);
             tg.close();
         }
-
-        // Анимация транзакций "МУРАВЕЙНИК" С УМНОЙ ЗАДЕРЖКОЙ
-        const feed = document.getElementById('tx-feed');
-        function addTx() {
-            const users = ['0x4f...d2', '0x1a...9c', '0xbb...11', '0x7e...e4', '0x21...ff', '0x88...aa', '0x99...cc'];
-            const amts = ['5.00', '10.00', '12.50', '20.00', '15.00', '8.00', '25.00'];
-            const item = `<div class="tx-item"><span class="tx-user">${users[Math.floor(Math.random()*users.length)]}</span><span class="tx-amt">+${amts[Math.floor(Math.random()*amts.length)]} USDT</span></div>`;
-            feed.insertAdjacentHTML('afterbegin', item);
-            if(feed.children.length > 4) feed.lastElementChild.remove();
-        }
-
-        // УМНЫЙ ДВИЖОК: Зависит от количества людей в группе
-        let minDelay, maxDelay;
-        if (membersCount < 50) {
-            minDelay = 45000; maxDelay = 90000; // До 50 чел: 1 транзакция раз в 1-1.5 минуты (очень редко)
-        } else if (membersCount < 500) {
-            minDelay = 20000; maxDelay = 40000; // До 500 чел: раз в 20-40 секунд
-        } else if (membersCount < 2000) {
-            minDelay = 8000; maxDelay = 15000;  // Нормальный режим: 8-15 секунд
-        } else {
-            minDelay = 2500; maxDelay = 6000;   // Режим ХАЙПА: 2.5-6 секунд
-        }
-
-        // При старте показываем 1-2 транзакции сразу, чтобы не было пусто
-        addTx();
-        setTimeout(addTx, 2000);
-
-        function schedule() { 
-            addTx(); 
-            setTimeout(schedule, Math.random() * (maxDelay - minDelay) + minDelay);
-        }
-        setTimeout(schedule, maxDelay); // Запускаем цикл с учетом новой задержки
-
         tg.ready();
     </script>
 </body>
