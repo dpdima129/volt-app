@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root { --volt: #ffae00; --bg: #030305; --glass: rgba(15, 15, 18, 0.8); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
         body { 
             background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; 
@@ -18,49 +18,55 @@
 
         /* --- UI БЛОКИ ПРЕСЕЙЛА --- */
         .main-card { 
-            width: 92%; max-width: 450px; background: var(--glass); 
-            border: 1px solid rgba(255, 174, 0, 0.2); border-radius: 32px; 
-            padding: 30px 24px; box-shadow: 0 0 40px rgba(0,0,0,1);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            margin-top: 20px; z-index: 10;
+            width: 92%; max-width: 450px; background: var(--glass); border: 1px solid rgba(255, 174, 0, 0.2); 
+            border-radius: 32px; padding: 30px 24px; box-shadow: 0 0 40px rgba(0,0,0,1); margin-top: 20px; z-index: 10;
         }
-
         .header { width: 100%; padding: 25px; display: flex; justify-content: space-between; align-items: center; max-width: 500px; }
         .logo { font-weight: 900; font-size: 24px; letter-spacing: -1px; }
         .logo span { color: var(--volt); text-shadow: 0 0 15px rgba(255,174,0,0.5); }
-
-        .personal-card { 
-            background: rgba(255, 174, 0, 0.03); border: 1px solid rgba(255,174,0,0.15);
-            border-radius: 24px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
-        }
+        .personal-card { background: rgba(255, 174, 0, 0.03); border: 1px solid rgba(255,174,0,0.15); border-radius: 24px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
         .p-val { color: var(--volt); font-size: 20px; font-weight: 900; }
-
         .stats-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
         .stat-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
         .stat-value { font-size: 22px; font-weight: 900; }
-
         .progress-container { margin-bottom: 30px; }
         .bar-bg { background: #111; height: 16px; border-radius: 100px; overflow: hidden; border: 1px solid #222; }
         .bar-fill { background: linear-gradient(90deg, #ff8c00, #ffae00); width: 0%; height: 100%; transition: width 2s ease; }
-
         .payment-zone { background: #000; border: 1px solid #222; border-radius: 24px; padding: 20px; text-align: center; margin-top: 15px; display: none; }
         .wallet-addr { font-family: monospace; font-size: 12px; color: #00ffaa; display: block; background: #111; padding: 12px; border-radius: 12px; margin: 15px 0; border: 1px dashed #333; user-select: all; }
         .tx-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 16px; margin-bottom: 15px; outline: none; }
-
         .btn-main { background: #fff; color: #000; border: none; width: 100%; padding: 20px; border-radius: 20px; font-size: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        /* --- ОБЩИЕ СТИЛИ ДЛЯ ИГР --- */
+        /* --- ИГРОВЫЕ КОНТЕЙНЕРЫ --- */
         .game-wrapper {
             width: 92%; max-width: 450px; background: #000; border: 2px solid #333; 
             border-radius: 16px; margin-top: 25px; overflow: hidden; position: relative;
         }
-        .game-header { background: #111; padding: 10px 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #333; }
+        .game-header { background: #111; padding: 10px 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #333; align-items: center;}
         .game-title { font-family: monospace; font-size: 12px; color: #00ffaa; }
         .game-score { font-family: monospace; font-size: 14px; color: var(--volt); font-weight: bold; }
-        canvas { width: 100%; display: block; image-rendering: pixelated; background: #050505; }
+        canvas { width: 100%; display: block; image-rendering: pixelated; background: #111; }
+        
+        .fs-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; font-size: 10px; cursor: pointer; }
         .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
-        .btn-play { background: transparent; color: var(--volt); border: 2px solid var(--volt); padding: 10px 20px; font-family: monospace; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-        .btn-play:active { background: var(--volt); color: #000; }
+        .btn-play { background: transparent; color: var(--volt); border: 2px solid var(--volt); padding: 10px 20px; font-family: monospace; font-size: 14px; cursor: pointer; text-transform: uppercase; border-radius: 8px;}
+        
+        /* Полноэкранный режим и виртуальный джойстик */
+        .fullscreen-active { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; max-width: 100%; border-radius: 0; z-index: 9999; display: flex; flex-direction: column; background: #000; border: none; margin: 0; }
+        .fullscreen-active canvas { flex-grow: 1; height: auto; max-height: 70vh; object-fit: contain; }
+        
+        .controls-pad { display: none; padding: 20px; justify-content: space-between; background: #111; height: 30vh; width: 100%; align-items: center; }
+        .fullscreen-active .controls-pad { display: flex; }
+        
+        .dpad { display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px 50px; gap: 5px; }
+        .dbtn { background: #333; border: 2px solid #555; border-radius: 10px; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: bold; font-size: 20px; user-select: none; }
+        .dbtn:active { background: var(--volt); color: #000; border-color: var(--volt); }
+        .up { grid-column: 2; grid-row: 1; } .left { grid-column: 1; grid-row: 2; } .right { grid-column: 3; grid-row: 2; } .down { grid-column: 2; grid-row: 3; }
+        
+        .action-pad { display: flex; gap: 15px; }
+        .abtn { width: 70px; height: 70px; border-radius: 50%; background: #900; border: 4px solid #f00; color: #fff; font-weight: bold; font-size: 18px; box-shadow: 0 5px 0 #500; display: flex; justify-content: center; align-items: center; user-select: none; }
+        .abtn:active { transform: translateY(5px); box-shadow: none; background: #f00; }
+
     </style>
 </head>
 <body>
@@ -81,8 +87,7 @@
         </div>
         <div class="progress-container">
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px;">
-                <span id="percent-text">0%</span>
-                <span id="goal-text">Goal: 50,000</span>
+                <span id="percent-text">0%</span><span id="goal-text">Goal: 50k USDT</span>
             </div>
             <div class="bar-bg"><div class="bar-fill" id="progress-bar"></div></div>
         </div>
@@ -95,26 +100,29 @@
         <button class="btn-main" id="buy-btn" onclick="showPay()">Participate</button>
     </div>
 
-    <div class="game-wrapper">
-        <div class="game-header">
-            <span class="game-title">Volt Cyber-Racer</span>
-            <span class="game-score" id="race-score">ENG: 0.000</span>
-        </div>
-        <canvas id="raceCanvas" width="300" height="200"></canvas>
-        <div class="game-overlay" id="raceStart">
-            <button class="btn-play" onclick="initRace()">START ENGINE</button>
-        </div>
-    </div>
-
-    <div class="game-wrapper">
+    <div class="game-wrapper" id="tank-wrapper">
         <div class="game-header">
             <span class="game-title">Volt Battle City</span>
-            <span class="game-score" id="tank-score">ENG: 0.000</span>
+            <div>
+                <button class="fs-btn" onclick="toggleFS('tank-wrapper')">FULLSCREEN</button>
+                <span class="game-score" id="tank-score" style="margin-left:10px;">ENG: 0.000</span>
+            </div>
         </div>
-        <canvas id="tankCanvas" width="300" height="250"></canvas>
+        <canvas id="tankCanvas" width="260" height="260"></canvas>
+        <div class="controls-pad">
+            <div class="dpad">
+                <div class="dbtn up" onpointerdown="inputD('U')" onpointerup="inputD(null)">▲</div>
+                <div class="dbtn left" onpointerdown="inputD('L')" onpointerup="inputD(null)">◄</div>
+                <div class="dbtn right" onpointerdown="inputD('R')" onpointerup="inputD(null)">►</div>
+                <div class="dbtn down" onpointerdown="inputD('D')" onpointerup="inputD(null)">▼</div>
+            </div>
+            <div class="action-pad">
+                <div class="abtn" onpointerdown="fireTank()">FIRE</div>
+            </div>
+        </div>
         <div class="game-overlay" id="tankStart">
             <button class="btn-play" onclick="initTanks()">START MISSION</button>
-            <span style="font-family:monospace; font-size:10px; color:#555; margin-top:10px;">Tap edges to move / Center to fire</span>
+            <span style="font-family:monospace; font-size:10px; color:#aaa; margin-top:15px; text-align:center;">Use FULLSCREEN for on-screen joystick<br>Defeat Bots & Farm Energy</span>
         </div>
     </div>
 
@@ -123,165 +131,161 @@
         tg.expand();
         tg.headerColor = '#030305';
         
-        // --- ОБЩАЯ ЭКОНОМИКА (Копейки) ---
         let globalScore = localStorage.getItem('v_score') ? parseFloat(localStorage.getItem('v_score')) : 0;
-        const updateUI = () => {
-            const s = globalScore.toFixed(3);
-            document.getElementById('race-score').innerText = 'ENG: ' + s;
-            document.getElementById('tank-score').innerText = 'ENG: ' + s;
-            localStorage.setItem('v_score', globalScore);
-        };
+        const updateUI = () => { document.getElementById('tank-score').innerText = 'ENG: ' + globalScore.toFixed(3); localStorage.setItem('v_score', globalScore); };
         updateUI();
 
-        // --- 1. ЛОГИКА ПРЕСЕЙЛА (Полностью исправлена) ---
+        // --- ПРЕСЕЙЛ ЛОГИКА ---
         const params = new URLSearchParams(window.location.search);
-        const raised = parseFloat(params.get('raised') || 0);
-        const goal = parseFloat(params.get('goal') || 50000);
-        const phase = params.get('phase') || 1;
-        const myVolt = parseFloat(params.get('volt') || 0);
-        const myUsd = parseFloat(params.get('usd') || 0);
+        document.getElementById('my-volt').innerText = parseFloat(params.get('volt')||0).toFixed(2) + ' VOLT';
+        document.getElementById('my-usd').innerText = parseFloat(params.get('usd')||0).toFixed(2) + ' USDT';
+        document.getElementById('total-raised').innerText = parseFloat(params.get('raised')||0).toFixed(2) + ' USDT';
+        let pct = (parseFloat(params.get('raised')||0) / 50000) * 100;
+        setTimeout(() => { document.getElementById('progress-bar').style.width = (pct>100?100:pct) + '%'; document.getElementById('percent-text').innerText = pct.toFixed(1) + '%'; }, 500);
 
-        // Заполняем интерфейс реальными данными из бота
-        document.getElementById('my-volt').innerText = myVolt.toFixed(2) + ' VOLT';
-        document.getElementById('my-usd').innerText = myUsd.toFixed(2) + ' USDT';
-        document.getElementById('total-raised').innerText = raised.toFixed(2) + ' USDT';
-        document.getElementById('phase-num').innerText = 'Phase ' + phase;
-        document.getElementById('goal-text').innerText = 'Goal: ' + goal.toLocaleString();
+        function showPay() { document.getElementById('payment-area').style.display='block'; document.getElementById('buy-btn').style.display='none'; }
+        function submitTx() { let h = document.getElementById('tx-hash').value; if(h.length>10){tg.sendData("txid:"+h); tg.close();} }
 
-        // Прогресс бар
-        let pct = (raised / goal) * 100;
-        setTimeout(() => {
-            document.getElementById('progress-bar').style.width = (pct > 100 ? 100 : pct) + '%';
-            document.getElementById('percent-text').innerText = pct.toFixed(1) + '%';
-        }, 500);
+        function toggleFS(id) {
+            let el = document.getElementById(id);
+            if(!document.fullscreenElement) {
+                if(el.requestFullscreen) el.requestFullscreen();
+                el.classList.add('fullscreen-active');
+            } else {
+                if(document.exitFullscreen) document.exitFullscreen();
+                el.classList.remove('fullscreen-active');
+            }
+        }
 
-        function showPay() { document.getElementById('payment-area').style.display = 'block'; document.getElementById('buy-btn').style.display = 'none'; }
-        function submitTx() { let h = document.getElementById('tx-hash').value; if(h.length > 10) { tg.sendData("txid:"+h); tg.close(); } else { alert("Please enter a valid TxID"); } }
+        // --- BATTLE CITY (DENDY CLONE) ---
+        const tc = document.getElementById('tankCanvas');
+        const ctx = tc.getContext('2d');
+        let tRun = false, pTank = {x:80, y:220, d:'U', move:null}, bullets = [], walls = [], bots = [];
+        let botTimer = 0;
 
-        // --- 2. ЛОГИКА ГОНКИ ---
-        const rCanvas = document.getElementById('raceCanvas');
-        const rCtx = rCanvas.getContext('2d');
-        let rRunning = false, carX = 135, batteries = [], rSpeed = 2;
-        
-        function initRace() { document.getElementById('raceStart').style.display='none'; rRunning=true; batteries=[]; animateRace(); }
-        
-        rCanvas.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            let x = (e.touches[0].clientX - rCanvas.getBoundingClientRect().left); 
-            carX = x < rCanvas.clientWidth/2 ? Math.max(10, carX-40) : Math.min(260, carX+40); 
-        });
+        function inputD(dir) { pTank.move = dir; }
+        function fireTank() { 
+            if(bullets.filter(b=>b.isPlayer).length < 2) {
+                bullets.push({x:pTank.x+8, y:pTank.y+8, d:pTank.d, isPlayer:true});
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        }
 
-        function animateRace() {
-            if(!rRunning) return;
-            rCtx.clearRect(0,0,300,200);
-            
-            // Дорога
-            rCtx.fillStyle = '#333';
-            for(let i=0; i<5; i++) rCtx.fillRect(148, (performance.now()/10 + i*50)%200 - 20, 4, 20);
+        // Отрисовка танка в 8-битном стиле
+        function drawTank(x, y, dir, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x+4, y+4, 12, 12); // База
+            ctx.fillStyle = '#888'; // Гусеницы
+            if(dir==='U' || dir==='D') {
+                ctx.fillRect(x, y, 4, 20); ctx.fillRect(x+16, y, 4, 20);
+                ctx.fillStyle = '#bbb'; ctx.fillRect(x+8, dir==='U'?y:y+10, 4, 10); // Дуло
+            } else {
+                ctx.fillRect(x, y, 20, 4); ctx.fillRect(x, y+16, 20, 4);
+                ctx.fillStyle = '#bbb'; ctx.fillRect(dir==='L'?x:x+10, y+8, 10, 4);
+            }
+        }
 
-            // Машина
-            rCtx.fillStyle = '#00ffff'; rCtx.fillRect(carX, 150, 30, 40);
+        // Отрисовка текстуры кирпича
+        function drawBrick(x, y) {
+            ctx.fillStyle = '#cc5500'; ctx.fillRect(x, y, 20, 20);
+            ctx.fillStyle = '#222'; ctx.fillRect(x, y+9, 20, 2); ctx.fillRect(x+9, y, 2, 20);
+            ctx.fillStyle = '#e8741e'; ctx.fillRect(x, y, 20, 1); ctx.fillRect(x, y+10, 20, 1);
+        }
 
-            // Спавн батареек
-            if(Math.random() < 0.03) batteries.push({x: Math.random()*270, y: -20});
-            
-            // Движение батареек и сбор
-            rCtx.fillStyle = '#ffae00';
-            for(let i = batteries.length - 1; i >= 0; i--) {
-                let b = batteries[i];
-                b.y += rSpeed;
-                rCtx.fillRect(b.x, b.y, 15, 15);
-                
-                // Столкновение с машиной
-                if(carX < b.x+15 && carX+30 > b.x && 150 < b.y+15 && 190 > b.y) {
-                    globalScore += 0.001; updateUI();
-                    if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-                    batteries.splice(i, 1);
-                } else if(b.y > 200) {
-                    batteries.splice(i, 1);
+        function buildMap() {
+            walls = []; bots = []; bullets = []; pTank.x = 80; pTank.y = 220; pTank.d = 'U';
+            // Классические колоны
+            for(let i=20; i<=220; i+=40) {
+                for(let j=20; j<=160; j+=40) {
+                    walls.push({x:i, y:j, hp:1}); walls.push({x:i, y:j+20, hp:1});
                 }
             }
-            requestAnimationFrame(animateRace);
+            // База орла (упрощенная)
+            walls.push({x:100, y:240, hp:1}); walls.push({x:100, y:220, hp:1});
+            walls.push({x:120, y:220, hp:1}); walls.push({x:140, y:220, hp:1}); walls.push({x:140, y:240, hp:1});
+            spawnBot(); spawnBot();
         }
 
-        // --- 3. ЛОГИКА ТАНКОВ ---
-        const tCanvas = document.getElementById('tankCanvas');
-        const tCtx = tCanvas.getContext('2d');
-        let tRunning = false;
-        let pTank = {x: 140, y: 200, d: 'U'};
-        let bullets = [], walls = [];
-
-        // Создаем стены
-        function generateWalls() {
-            walls = [];
-            for(let i=0; i<6; i++) {
-                walls.push({x: 40 + Math.random()*200, y: 40 + Math.random()*120});
-            }
+        function spawnBot() {
+            bots.push({x: Math.random()>0.5 ? 20 : 220, y: 0, d:'D', moveTimer:0});
         }
 
-        function initTanks() { document.getElementById('tankStart').style.display='none'; tRunning=true; generateWalls(); animateTanks(); }
+        function initTanks() { document.getElementById('tankStart').style.display='none'; tRun=true; buildMap(); animateTanks(); }
 
-        tCanvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const rect = tCanvas.getBoundingClientRect();
-            const x = e.touches[0].clientX - rect.left, y = e.touches[0].clientY - rect.top;
-            const w = rect.width, h = rect.height;
-            
-            // Зона стрельбы (центр экрана)
-            if(x > w*0.3 && x < w*0.7 && y > h*0.3 && y < h*0.7) {
-                bullets.push({x: pTank.x+8, y: pTank.y+8, d: pTank.d});
-                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            } else {
-                // Движение
-                if(y < h*0.3) { pTank.d='U'; pTank.y = Math.max(0, pTank.y-15); }
-                else if(y > h*0.7) { pTank.d='D'; pTank.y = Math.min(230, pTank.y+15); }
-                else if(x < w*0.3) { pTank.d='L'; pTank.x = Math.max(0, pTank.x-15); }
-                else if(x > w*0.7) { pTank.d='R'; pTank.x = Math.min(280, pTank.x+15); }
-            }
-        });
+        function checkCol(x, y, size, ignoreObj) {
+            if(x<0 || x+size>260 || y<0 || y+size>260) return true;
+            for(let w of walls) if(x < w.x+20 && x+size > w.x && y < w.y+20 && y+size > w.y) return true;
+            return false;
+        }
 
         function animateTanks() {
-            if(!tRunning) return;
-            tCtx.clearRect(0,0,300,250);
-            
-            // Кирпичные стены
-            tCtx.fillStyle = '#a65628';
-            walls.forEach(w => {
-                tCtx.fillRect(w.x, w.y, 20, 20);
-                tCtx.fillStyle = '#000'; tCtx.fillRect(w.x+9, w.y, 2, 20); tCtx.fillRect(w.x, w.y+9, 20, 2); tCtx.fillStyle = '#a65628';
-            });
+            if(!tRun) return;
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,260,260);
 
-            // Игрок (Танк)
-            tCtx.fillStyle = '#00ffaa';
-            tCtx.fillRect(pTank.x, pTank.y, 20, 20);
-            // Пушка
-            tCtx.fillStyle = '#fff';
-            if(pTank.d=='U') tCtx.fillRect(pTank.x+8, pTank.y-6, 4, 10);
-            if(pTank.d=='D') tCtx.fillRect(pTank.x+8, pTank.y+16, 4, 10);
-            if(pTank.d=='L') tCtx.fillRect(pTank.x-6, pTank.y+8, 10, 4);
-            if(pTank.d=='R') tCtx.fillRect(pTank.x+16, pTank.y+8, 10, 4);
+            // Движение игрока
+            if(pTank.move) {
+                pTank.d = pTank.move;
+                let nx = pTank.x, ny = pTank.y;
+                if(pTank.d==='U') ny-=2; if(pTank.d==='D') ny+=2; if(pTank.d==='L') nx-=2; if(pTank.d==='R') nx+=2;
+                if(!checkCol(nx, ny, 20)) { pTank.x = nx; pTank.y = ny; }
+            }
+
+            drawTank(pTank.x, pTank.y, pTank.d, '#ffae00'); // Игрок желтый
+
+            // Логика Ботов
+            botTimer++;
+            if(botTimer > 150 && bots.length < 3) { spawnBot(); botTimer = 0; }
+            
+            for(let i=bots.length-1; i>=0; i--) {
+                let b = bots[i];
+                b.moveTimer--;
+                if(b.moveTimer <= 0) {
+                    b.d = ['U','D','L','R'][Math.floor(Math.random()*4)];
+                    b.moveTimer = 30 + Math.random()*50;
+                    if(Math.random() > 0.5) bullets.push({x:b.x+8, y:b.y+8, d:b.d, isPlayer:false}); // Бот стреляет
+                }
+                let nx = b.x, ny = b.y;
+                if(b.d==='U') ny-=1; if(b.d==='D') ny+=1; if(b.d==='L') nx-=1; if(b.d==='R') nx+=1;
+                if(!checkCol(nx, ny, 20)) { b.x = nx; b.y = ny; } else { b.moveTimer = 0; } // Если уперся, меняем направление
+                
+                drawTank(b.x, b.y, b.d, '#ff0055'); // Боты красные
+            }
+
+            // Отрисовка стен
+            walls.forEach(w => drawBrick(w.x, w.y));
+
+            // База
+            ctx.fillStyle = '#00ffaa'; ctx.fillRect(120, 240, 20, 20);
 
             // Пули
-            tCtx.fillStyle = '#ffae00';
+            ctx.fillStyle = '#fff';
             for(let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
-                if(b.d=='U') b.y-=5; if(b.d=='D') b.y+=5; if(b.d=='L') b.x-=5; if(b.d=='R') b.x+=5;
-                tCtx.fillRect(b.x, b.y, 4, 4);
-                
-                // Проверка попадания в стены
+                if(b.d==='U') b.y-=5; if(b.d==='D') b.y+=5; if(b.d==='L') b.x-=5; if(b.d==='R') b.x+=5;
+                ctx.fillRect(b.x, b.y, 4, 4);
+
                 let hit = false;
+                // Попадание в стену
                 for(let wi = walls.length - 1; wi >= 0; wi--) {
                     let w = walls[wi];
                     if(b.x > w.x && b.x < w.x+20 && b.y > w.y && b.y < w.y+20) {
-                        walls.splice(wi, 1);
-                        bullets.splice(i, 1);
-                        globalScore += 0.001; updateUI();
-                        hit = true;
-                        if(walls.length === 0) setTimeout(generateWalls, 1000); // Респаун кирпичей
+                        walls.splice(wi, 1); bullets.splice(i, 1); hit = true;
+                        if(b.isPlayer) { globalScore += 0.001; updateUI(); } // Копейки за кирпичи
                         break;
                     }
                 }
-                if(!hit && (b.x < 0 || b.x > 300 || b.y < 0 || b.y > 250)) bullets.splice(i, 1);
+                // Попадание в бота
+                if(b.isPlayer && !hit) {
+                    for(let bi = bots.length - 1; bi >= 0; bi--) {
+                        let bot = bots[bi];
+                        if(b.x > bot.x && b.x < bot.x+20 && b.y > bot.y && b.y < bot.y+20) {
+                            bots.splice(bi, 1); bullets.splice(i, 1); hit = true;
+                            globalScore += 0.010; updateUI(); // За килл больше копеек
+                            break;
+                        }
+                    }
+                }
+                if(!hit && (b.x < 0 || b.x > 260 || b.y < 0 || b.y > 260)) bullets.splice(i, 1);
             }
 
             requestAnimationFrame(animateTanks);
