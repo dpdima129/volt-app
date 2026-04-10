@@ -7,62 +7,19 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --volt-primary: #ffae00; 
-            --volt-dark: #ff8c00;
-            --bg-color: #030305; 
-            --card-bg: rgba(15, 15, 18, 0.75);
-            --glow: rgba(255, 174, 0, 0.4);
-        }
-        
+        :root { --volt-primary: #ffae00; --volt-dark: #ff8c00; --bg-color: #030305; --card-bg: rgba(15, 15, 18, 0.75); --glow: rgba(255, 174, 0, 0.4); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: var(--bg-color); 
-            background-image: radial-gradient(circle at 50% -20%, rgba(255, 174, 0, 0.1) 0%, transparent 50%);
-            color: #fff; 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; padding: 0; 
-            display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; overflow-x: hidden; 
-        }
-
-        /* Эффект вспышки молнии на фоне */
-        @keyframes lightning {
-            0%, 95%, 98% { background-color: transparent; }
-            96%, 99% { background-color: rgba(255, 174, 0, 0.05); }
-            100% { background-color: transparent; }
-        }
-        body::after {
-            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none; z-index: -1; animation: lightning 7s infinite;
-        }
+        body { background: var(--bg-color); background-image: radial-gradient(circle at 50% -20%, rgba(255, 174, 0, 0.1) 0%, transparent 50%); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        @keyframes lightning { 0%, 95%, 98% { background-color: transparent; } 96%, 99% { background-color: rgba(255, 174, 0, 0.05); } 100% { background-color: transparent; } }
+        body::after { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: -1; animation: lightning 7s infinite; }
         
         .header { width: 100%; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; max-width: 500px; }
         .logo { font-weight: 900; font-size: 22px; display: flex; align-items: center; letter-spacing: -0.5px; }
         .logo span { color: var(--volt-primary); text-shadow: 0 0 15px var(--glow); }
-        .status-tag { 
-            background: rgba(255,174,0,0.1); color: var(--volt-primary); 
-            padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; 
-            text-transform: uppercase; border: 1px solid rgba(255,174,0,0.3); 
-            box-shadow: 0 0 15px rgba(255,174,0,0.15); 
-        }
+        .status-tag { background: rgba(255,174,0,0.1); color: var(--volt-primary); padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,174,0,0.3); box-shadow: 0 0 15px rgba(255,174,0,0.15); }
         
-        /* Главная карточка (Стиль "Стекло") */
-        .main-card { 
-            width: 92%; max-width: 450px; background: var(--card-bg); 
-            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; 
-            padding: 28px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); 
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); margin-top: 10px; position: relative; overflow: hidden;
-        }
-        
-        /* Личный кабинет внутри карточки */
-        .personal-card { 
-            background: linear-gradient(145deg, rgba(20,20,25,1) 0%, rgba(10,10,12,1) 100%); 
-            border: 1px solid rgba(255,174,0,0.2); border-radius: 24px; padding: 20px; 
-            margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: inset 0 0 20px rgba(255,174,0,0.05);
-        }
+        .main-card { width: 92%; max-width: 450px; background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; padding: 28px 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); margin-top: 10px; position: relative; overflow: hidden; }
+        .personal-card { background: linear-gradient(145deg, rgba(20,20,25,1) 0%, rgba(10,10,12,1) 100%); border: 1px solid rgba(255,174,0,0.2); border-radius: 24px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 20px rgba(255,174,0,0.05); }
         .personal-card div { display: flex; flex-direction: column; gap: 6px; }
         .p-val { color: var(--volt-primary); font-size: 18px; font-weight: 900; text-shadow: 0 0 10px var(--glow); }
         
@@ -71,64 +28,27 @@
         .stat-label { color: #888; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-value { font-size: 24px; font-weight: 900; }
 
-        /* Анимированный прогресс-бар с бликом */
         .progress-container { margin-bottom: 30px; }
         .progress-labels { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: #aaa; font-weight: 600;}
         .bar-bg { background: #111; border: 1px solid #333; height: 16px; border-radius: 100px; position: relative; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-        .bar-fill { 
-            background: linear-gradient(90deg, var(--volt-dark), var(--volt-primary)); 
-            width: 0%; height: 100%; border-radius: 100px;
-            box-shadow: 0 0 20px var(--volt-primary); transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
-            position: relative; overflow: hidden;
-        }
-        /* Блик бегущий по полосе */
-        .bar-fill::after {
-            content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            animation: shine 2.5s infinite;
-        }
+        .bar-fill { background: linear-gradient(90deg, var(--volt-dark), var(--volt-primary)); width: 0%; height: 100%; border-radius: 100px; box-shadow: 0 0 20px var(--volt-primary); transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .bar-fill::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); animation: shine 2.5s infinite; }
         @keyframes shine { 100% { left: 200%; } }
 
-        /* Поле оплаты */
         .input-group { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 24px; margin-bottom: 15px; text-align: center; }
-        .wallet-addr { 
-            font-family: monospace; font-size: 13px; color: #00ffaa; word-break: break-all; 
-            margin: 15px 0; display: block; background: #050505; padding: 14px; 
-            border-radius: 12px; border: 1px dashed #333; user-select: all; text-shadow: 0 0 5px rgba(0,255,170,0.3);
-        }
-        .tx-input { 
-            width: 100%; background: #050505; border: 1px solid #333; color: #fff; 
-            padding: 16px; border-radius: 16px; margin: 15px 0; font-family: monospace; 
-            font-size: 13px; outline: none; transition: 0.3s; 
-        }
+        .wallet-addr { font-family: monospace; font-size: 13px; color: #00ffaa; word-break: break-all; margin: 15px 0; display: block; background: #050505; padding: 14px; border-radius: 12px; border: 1px dashed #333; user-select: all; text-shadow: 0 0 5px rgba(0,255,170,0.3); }
+        .tx-input { width: 100%; background: #050505; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 16px; margin: 15px 0; font-family: monospace; font-size: 13px; outline: none; transition: 0.3s; }
         .tx-input:focus { border-color: var(--volt-primary); box-shadow: 0 0 15px rgba(255,174,0,0.2); }
 
-        /* Премиум кнопки */
-        .btn-main { 
-            background: #fff; color: #000; border: none; width: 100%; padding: 20px; 
-            border-radius: 20px; font-size: 16px; font-weight: 900; cursor: pointer; 
-            text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: 0.2s; position: relative; overflow: hidden;
-        }
+        .btn-main { background: #fff; color: #000; border: none; width: 100%; padding: 20px; border-radius: 20px; font-size: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 20px rgba(255,255,255,0.2); transition: 0.2s; position: relative; overflow: hidden; }
         .btn-main:active { transform: scale(0.97); }
-        .btn-success {
-            background: linear-gradient(90deg, #00ffaa, #00cc88); color: #000;
-            box-shadow: 0 0 20px rgba(0,255,170,0.3);
-        }
+        .btn-success { background: linear-gradient(90deg, #00ffaa, #00cc88); color: #000; box-shadow: 0 0 20px rgba(0,255,170,0.3); }
 
-        /* Красивая лента транзакций */
         .live-tx { width: 92%; max-width: 450px; margin-top: 30px; padding-bottom: 40px;}
         .tx-title { font-size: 12px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;}
         .dot { width: 8px; height: 8px; background: #00ffaa; border-radius: 50%; box-shadow: 0 0 10px #00ffaa; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.3; box-shadow: none; } }
-        
-        .tx-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.02);
-            border-radius: 16px; margin-bottom: 10px; font-size: 13px; 
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.02); border-radius: 16px; margin-bottom: 10px; font-size: 13px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .tx-user { color: #aaa; font-family: monospace; }
         .tx-amt { color: #00ffaa; font-weight: 900; font-size: 15px; text-shadow: 0 0 10px rgba(0,255,170,0.2); }
@@ -142,7 +62,6 @@
     </div>
 
     <div class="main-card">
-        
         <div class="personal-card">
             <div>
                 <span class="stat-label">Your Allocation</span>
@@ -176,12 +95,10 @@
         <div id="payment-zone" style="display: none; animation: slideUp 0.3s ease-out;">
             <div class="input-group">
                 <span class="stat-label" style="color: #fff;">1. Transfer USDT (TRC20) to:</span>
-                <span class="wallet-addr">TDMdmJJriad71a4tHYCqruLggtJZ8gz1Lc</span>
+                <span class="wallet-addr">TDMdmJJriad71a4tHYCqruLggtীবtJZ8gz1Lc</span>
                 <p style="font-size: 11px; color: #888; margin: 0 0 20px 0;">Minimum deposit: 5 USDT</p>
-                
                 <span class="stat-label" style="color: #fff;">2. Verify Transaction</span>
                 <input type="text" id="tx-hash" class="tx-input" placeholder="Paste TxID (Hash) here...">
-                
                 <button class="btn-main btn-success" onclick="submitHash()">VERIFY PAYMENT</button>
             </div>
         </div>
@@ -200,11 +117,12 @@
         tg.headerColor = '#030305';
         tg.backgroundColor = '#030305';
 
-        // Подгрузка данных от бота
         const urlParams = new URLSearchParams(window.location.search);
         
         const myUsd = parseFloat(urlParams.get('usd') || 0);
         const myVolt = parseFloat(urlParams.get('volt') || 0);
+        const membersCount = parseInt(urlParams.get('m') || 5); // Получаем кол-во людей в группе от бота!
+
         document.getElementById('my-usd').innerText = myUsd.toFixed(2) + ' USDT';
         document.getElementById('my-volt').innerText = myVolt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' VOLT';
 
@@ -218,7 +136,6 @@
         document.getElementById('total-raised').innerText = raised.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' USDT';
         document.getElementById('goal-text').innerText = 'Goal: ' + goal.toLocaleString('en-US') + ' USDT';
 
-        // Анимация полоски
         setTimeout(() => {
             let percent = (raised / goal) * 100;
             if(percent > 100) percent = 100;
@@ -245,20 +162,37 @@
             tg.close();
         }
 
-        // Анимированный муравейник
+        // Анимация транзакций "МУРАВЕЙНИК" С УМНОЙ ЗАДЕРЖКОЙ
         const feed = document.getElementById('tx-feed');
         function addTx() {
-            const users = ['0x4f...d2', '0x1a...9c', '0xbb...11', '0x7e...e4', '0x21...ff', '0x88...aa', '0x99...cc', '0x12...a1'];
-            const amts = ['5.00', '10.00', '12.50', '20.00', '15.00', '8.00', '25.00', '30.00', '7.50', '11.00'];
+            const users = ['0x4f...d2', '0x1a...9c', '0xbb...11', '0x7e...e4', '0x21...ff', '0x88...aa', '0x99...cc'];
+            const amts = ['5.00', '10.00', '12.50', '20.00', '15.00', '8.00', '25.00'];
             const item = `<div class="tx-item"><span class="tx-user">${users[Math.floor(Math.random()*users.length)]}</span><span class="tx-amt">+${amts[Math.floor(Math.random()*amts.length)]} USDT</span></div>`;
             feed.insertAdjacentHTML('afterbegin', item);
-            if(feed.children.length > 5) feed.lastElementChild.remove();
+            if(feed.children.length > 4) feed.lastElementChild.remove();
         }
+
+        // УМНЫЙ ДВИЖОК: Зависит от количества людей в группе
+        let minDelay, maxDelay;
+        if (membersCount < 50) {
+            minDelay = 45000; maxDelay = 90000; // До 50 чел: 1 транзакция раз в 1-1.5 минуты (очень редко)
+        } else if (membersCount < 500) {
+            minDelay = 20000; maxDelay = 40000; // До 500 чел: раз в 20-40 секунд
+        } else if (membersCount < 2000) {
+            minDelay = 8000; maxDelay = 15000;  // Нормальный режим: 8-15 секунд
+        } else {
+            minDelay = 2500; maxDelay = 6000;   // Режим ХАЙПА: 2.5-6 секунд
+        }
+
+        // При старте показываем 1-2 транзакции сразу, чтобы не было пусто
+        addTx();
+        setTimeout(addTx, 2000);
+
         function schedule() { 
             addTx(); 
-            setTimeout(schedule, Math.random() * 4000 + 2500); // Быстрая активность
+            setTimeout(schedule, Math.random() * (maxDelay - minDelay) + minDelay);
         }
-        schedule();
+        setTimeout(schedule, maxDelay); // Запускаем цикл с учетом новой задержки
 
         tg.ready();
     </script>
