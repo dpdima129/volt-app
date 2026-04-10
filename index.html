@@ -3,157 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Volt Token | Official Presale</title>
+    <title>Volt Token Presale</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: #08080a;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 420px;
-            background: #121216;
-            border: 1px solid #222228;
-            border-radius: 24px;
-            padding: 24px;
-            box-sizing: border-box;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-        .badge {
-            background: rgba(255, 174, 0, 0.1);
-            color: #ffae00;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-            border: 1px solid rgba(255,174,0,0.2);
-        }
-        h1 { font-size: 28px; margin: 15px 0 5px 0; font-weight: 900; }
-        .description { color: #888; font-size: 14px; margin-bottom: 25px; }
+        body { background: #08080a; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .container { width: 100%; max-width: 400px; background: #121216; border: 1px solid #222228; border-radius: 24px; padding: 24px; box-sizing: border-box; box-shadow: 0 20px 40px rgba(0,0,0,0.6); margin-bottom: 20px; }
+        .badge { background: rgba(255, 174, 0, 0.1); color: #ffae00; padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; border: 1px solid rgba(255,174,0,0.2); margin-bottom: 15px; }
+        h1 { font-size: 26px; margin: 0; font-weight: 900; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
+        .stat-card { background: #1a1a20; padding: 15px; border-radius: 16px; border: 1px solid #2a2a30; }
+        .stat-label { color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 17px; font-weight: 700; color: #ffae00; }
+        .prog-bg { background: #25252b; height: 10px; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        .prog-fill { background: linear-gradient(90deg, #ff8c00, #ffae00); height: 100%; width: 90.3%; box-shadow: 0 0 15px rgba(255, 140, 0, 0.4); }
+        .buy-btn { background: #fff; color: #000; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
         
-        /* Presale Stats */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .info-item {
-            background: #1a1a20;
-            padding: 15px;
-            border-radius: 16px;
-            border: 1px solid #2a2a30;
-        }
-        .info-label { color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
-        .info-value { font-size: 18px; font-weight: 700; color: #ffae00; }
+        /* Секция живых транзакций */
+        .live-section { width: 100%; max-width: 400px; }
+        .live-title { font-size: 14px; color: #666; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .live-dot { width: 8px; height: 8px; background: #00ffaa; border-radius: 50%; box-shadow: 0 0 10px #00ffaa; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .tx-card { background: #121216; border: 1px solid #222228; border-radius: 15px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tx-user { color: #aaa; font-family: monospace; }
+        .tx-amount { color: #00ffaa; font-weight: bold; }
 
-        /* Progress Bar */
-        .progress-section { margin-bottom: 30px; }
-        .progress-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: #aaa; }
-        .progress-bg { background: #25252b; height: 10px; border-radius: 10px; overflow: hidden; }
-        .progress-fill { 
-            background: linear-gradient(90deg, #ff8c00, #ffae00); 
-            height: 100%; 
-            width: 90.3%; /* Current progress */
-            box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
-        }
-
-        .buy-button {
-            background: #ffffff;
-            color: #000000;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-        .buy-button:active { transform: scale(0.97); background: #eeeeee; }
-
-        /* Wallet Section (Hidden by default) */
-        #payment-modal {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #2a2a30;
-            text-align: center;
-        }
-        .wallet-address {
-            background: #000;
-            padding: 12px;
-            border-radius: 10px;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-            margin: 10px 0;
-            border: 1px dashed #444;
-            color: #00ffaa;
-        }
+        #wallet-area { display: none; margin-top: 20px; text-align: center; background: #1a1a20; padding: 15px; border-radius: 16px; }
+        .addr { background: #000; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 10px; color: #00ffaa; word-break: break-all; margin: 10px 0; border: 1px dashed #444; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="badge">Live: Phase 8</div>
         <h1>Volt Token ⚡</h1>
-        <div class="description">Supercharged by AI, Unleashed by Volt Engine. Join the future of DeFi.</div>
-
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Price</div>
-                <div class="info-value">$0.0205</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Raised</div>
-                <div class="info-value">$2.50M</div>
-            </div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">$0.0205</div></div>
+            <div class="stat-card"><div class="stat-label">Raised</div><div class="stat-value">$2.50M</div></div>
         </div>
-
-        <div class="progress-section">
-            <div class="progress-header">
-                <span>90.3% Complete</span>
-                <span>Goal: $2.75M</span>
-            </div>
-            <div class="progress-bg">
-                <div class="progress-fill"></div>
-            </div>
+        <div class="prog-bg"><div class="prog-fill"></div></div>
+        <button class="buy-btn" onclick="showWall()">Join Presale</button>
+        <div id="wallet-area">
+            <div class="stat-label">Send USDT (BEP20) to:</div>
+            <div class="addr" id="wallet-addr">ЖДУ_ТВОЙ_КОШЕЛЕК_БРАТИШКА</div>
+            <div style="font-size: 10px; color: #666;">Minimum: 10 USDT. Automatic delivery.</div>
         </div>
+    </div>
 
-        <button class="buy-button" onclick="showPayment()">Join Presale</button>
-
-        <div id="payment-modal">
-            <div class="info-label">Send USDT (BEP20) to:</div>
-            <div class="wallet-address" id="wallet">0x4332...0d174</div>
-            <div style="font-size: 10px; color: #666;">Minimum purchase: 10 USDT</div>
-        </div>
+    <div class="live-section">
+        <div class="live-title"><div class="live-dot"></div> Live Transactions</div>
+        <div id="tx-list"></div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#08080a';
 
-        function showPayment() {
-            document.getElementById('payment-modal').style.display = 'block';
+        function showWall() {
+            document.getElementById('wallet-area').style.display = 'block';
             tg.HapticFeedback.notificationOccurred('success');
-            // Scroll to bottom
-            window.scrollTo(0, document.body.scrollHeight);
+            window.scrollTo(0, 500);
         }
+
+        // Генератор фейковых покупок для вида
+        const txList = document.getElementById('tx-list');
+        function addTx() {
+            const users = ['0x4f...2a', '0x12...9b', '0x7d...e4', '0x9a...11', '0xbc...f0'];
+            const amounts = ['150', '50', '1,200', '300', '85', '440'];
+            const user = users[Math.floor(Math.random() * users.length)];
+            const amount = amounts[Math.floor(Math.random() * amounts.length)];
+            
+            const html = `<div class="tx-card"><span class="tx-user">${user}</span><span class="tx-amount">+$${amount}</span></div>`;
+            txList.insertAdjacentHTML('afterbegin', html);
+            if(txList.children.length > 4) txList.lastElementChild.remove();
+        }
+        setInterval(addTx, 8000); // Новая покупка каждые 8 секунд
+        addTx(); addTx();
 
         tg.ready();
     </script>
