@@ -186,9 +186,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand(); tg.headerColor = '#030305';
 
-        // === СИНТЕЗАТОР ЗВУКА (Web Audio API) ===
+        // === 8-BIT MUSIC & SOUND SYNTHESIZER ===
         const actx = new (window.AudioContext || window.webkitAudioContext)();
-        let bgmNode = null;
+        let musicSeq = null;
+        
         function playTone(f, type, dur, vol=0.05) {
             if(actx.state === 'suspended') actx.resume();
             let o = actx.createOscillator(), g = actx.createGain();
@@ -198,21 +199,24 @@
             o.connect(g); g.connect(actx.destination);
             o.start(); o.stop(actx.currentTime + dur);
         }
+        
         function sndCoin() { playTone(800, 'sine', 0.1, 0.05); setTimeout(()=>playTone(1200, 'sine', 0.15, 0.05), 100); }
         function sndShoot() { playTone(300, 'square', 0.1, 0.03); }
         function sndHit() { playTone(100, 'sawtooth', 0.3, 0.1); }
         function sndJump() { playTone(250, 'sine', 0.2, 0.05); setTimeout(()=>playTone(400, 'sine', 0.2, 0.05), 50); }
         
-        function initBGM() {
+        // 8-bit Background Music Loop
+        const bgNotes = [220, 0, 261.63, 0, 329.63, 0, 440, 0, 392, 0, 329.63, 0];
+        let noteIdx = 0;
+        function playBGM() {
+            if(!rRun && !tRun && !dRun) return; 
             if(actx.state === 'suspended') actx.resume();
-            if(!bgmNode) {
-                bgmNode = actx.createOscillator(); let g = actx.createGain();
-                bgmNode.type = 'sine'; bgmNode.frequency.value = 55; // Низкий гул
-                g.gain.value = 0.02; // Очень тихо
-                bgmNode.connect(g); g.connect(actx.destination);
-                bgmNode.start();
-            }
+            if(bgNotes[noteIdx] > 0) playTone(bgNotes[noteIdx], 'square', 0.1, 0.015); 
+            noteIdx = (noteIdx + 1) % bgNotes.length;
+            musicSeq = setTimeout(playBGM, 200);
         }
+        function startMusic() { if(actx.state === 'suspended') actx.resume(); if(!musicSeq) playBGM(); }
+        function stopMusic() { clearTimeout(musicSeq); musicSeq = null; }
 
         // === ОБЩАЯ СИСТЕМА ЭНЕРГИИ ===
         let globalScore = parseFloat(localStorage.getItem('v_score') || 0);
@@ -239,7 +243,7 @@
         function showPay() { document.getElementById('payment-area').style.display='block'; document.getElementById('buy-btn').style.display='none'; window.scrollTo({ top: 300, behavior: 'smooth' }); }
         function submitTx() { let h = document.getElementById('tx-hash').value; if(h.length>10){tg.sendData("txid:"+h); tg.close();} }
 
-        // === ПОЛНОЭКРАННЫЙ РЕЖИМ (ФИКСИРОВАННЫЙ) ===
+        // === ПОЛНОЭКРАННЫЙ РЕЖИМ ===
         function enterFS(id) {
             const el = document.getElementById(id); el.classList.add('fullscreen-active');
             if(el.requestFullscreen) el.requestFullscreen();
@@ -251,16 +255,17 @@
             if(type === 'race') { rRun = false; document.getElementById('ov-race').style.display='flex'; document.getElementById('msg-race').innerText='START ENGINE'; }
             if(type === 'tank') { tRun = false; document.getElementById('ov-tank').style.display='flex'; document.getElementById('msg-tank').innerText='START MISSION'; }
             if(type === 'dash') { dRun = false; document.getElementById('ov-dash').style.display='flex'; document.getElementById('msg-dash').innerText='TAP TO DASH'; }
+            stopMusic(); 
         }
 
         function drawGlow(ctx, x, y, w, h, color) { ctx.shadowBlur=15; ctx.shadowColor=color; ctx.fillStyle=color; ctx.fillRect(x,y,w,h); ctx.shadowBlur=0; }
 
-        // === ИГРА: VOLT DASH (КРАСОЧНАЯ + ШЛЕЙФ) ===
+        // === ИГРА: VOLT DASH ===
         const dc = document.getElementById('dashCanvas'), dCtx = dc.getContext('2d');
         let dRun=false, dLives=3, pD={x:40, y:120, vy:0}, dObs=[], dGrid=0, trails=[];
         
         function updateDLives() { document.getElementById('hp-dash').innerText = 'HP: ' + dLives; }
-        function startDash() { initBGM(); document.getElementById('ov-dash').style.display='none'; dRun=true; pD.y=120; pD.vy=0; dObs=[]; trails=[]; dLives=3; updateDLives(); dLoop(); }
+        function startDash() { document.getElementById('ov-dash').style.display='none'; dRun=true; pD.y=120; pD.vy=0; dObs=[]; trails=[]; dLives=3; updateDLives(); startMusic(); dLoop(); }
         function dashJump() { if(pD.y >= 120) { pD.vy = -8.5; sndJump(); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); } }
 
         function drawSpikeNeon(x, y) {
@@ -272,56 +277,45 @@
             if(!dRun) return;
             dCtx.fillStyle="#020202"; dCtx.fillRect(0,0,300,150);
             
-            // Летающая сетка на фоне (Киберпанк)
             dCtx.strokeStyle = "rgba(0, 255, 170, 0.2)"; dCtx.lineWidth = 1;
             dGrid -= 2; if(dGrid <= -20) dGrid = 0;
             for(let i=0; i<16; i++) { dCtx.beginPath(); dCtx.moveTo(dGrid + i*20, 0); dCtx.lineTo(dGrid + i*20, 150); dCtx.stroke(); }
             
-            // Земля
             drawGlow(dCtx, 0, 140, 300, 10, "#ffae00");
 
-            // Физика
             pD.vy += 0.6; pD.y += pD.vy; if(pD.y > 120) { pD.y = 120; pD.vy = 0; }
 
-            // Шлейф (Трейл)
             trails.push({x: pD.x, y: pD.y, alpha: 1});
             if(trails.length > 10) trails.shift();
-            trails.forEach((t, i) => {
-                dCtx.fillStyle = `rgba(0, 255, 255, ${i*0.05})`;
-                dCtx.fillRect(t.x, t.y, 20, 20);
-            });
+            trails.forEach((t, i) => { dCtx.fillStyle = `rgba(0, 255, 255, ${i*0.05})`; dCtx.fillRect(t.x, t.y, 20, 20); });
 
-            // Куб
             dCtx.save(); dCtx.translate(pD.x+10, pD.y+10);
             if(pD.y < 120) dCtx.rotate(pD.y * 0.05);
             drawGlow(dCtx, -10, -10, 20, 20, "#00ffff");
-            dCtx.fillStyle = "#fff"; dCtx.fillRect(-4, -4, 8, 8); // Глаз
+            dCtx.fillStyle = "#fff"; dCtx.fillRect(-4, -4, 8, 8);
             dCtx.restore();
 
-            // Препятствия
             if(Math.random()<0.015) dObs.push({x:300, y:120, passed:false});
             for(let i=dObs.length-1; i>=0; i--) {
-                let ob = dObs[i]; ob.x -= 4.5;
-                drawSpikeNeon(ob.x, ob.y);
+                let ob = dObs[i]; ob.x -= 4.5; drawSpikeNeon(ob.x, ob.y);
                 
-                // Столкновение
                 if(pD.x < ob.x+15 && pD.x+20 > ob.x+5 && pD.y+20 > ob.y+10) {
                     sndHit(); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
                     dObs.splice(i, 1); dLives--; updateDLives();
-                    if(dLives <= 0) { dRun=false; document.getElementById('ov-dash').style.display='flex'; document.getElementById('msg-dash').innerHTML = '<span style="color:#ff0055">WASTED</span><br><br><span style="font-size:8px;color:#aaa">TAP TO RETRY</span>'; return; }
+                    if(dLives <= 0) { dRun=false; stopMusic(); document.getElementById('ov-dash').style.display='flex'; document.getElementById('msg-dash').innerHTML = '<span style="color:#ff0055">WASTED</span><br><br><span style="font-size:8px;color:#aaa">TAP TO RETRY</span>'; return; }
                 } else if(!ob.passed && ob.x < pD.x) {
-                    ob.passed = true; addScore(0.005); // Очки за перепрыгивание
+                    ob.passed = true; addScore(0.005);
                 } else if(ob.x < -20) { dObs.splice(i, 1); }
             }
             requestAnimationFrame(dLoop);
         }
 
-        // === ИГРА: КИБЕР-ГОНКА (СО ЗВЕЗДАМИ И ЗВУКОМ) ===
+        // === ИГРА: КИБЕР-ГОНКА ===
         const rc = document.getElementById('raceCanvas'), rCtx = rc.getContext('2d');
         let rRun=false, rX=100, rIn=null, rBoost=false, bats=[], rObs=[], rLives=3, stars=[];
         
         function updateRLives() { document.getElementById('hp-race').innerText = 'HP: ' + rLives; }
-        function startRace() { initBGM(); document.getElementById('ov-race').style.display='none'; rRun=true; rX=100; bats=[]; rObs=[]; stars=[]; rLives=3; updateRLives(); rLoop(); }
+        function startRace() { document.getElementById('ov-race').style.display='none'; rRun=true; rX=100; bats=[]; rObs=[]; stars=[]; rLives=3; updateRLives(); startMusic(); rLoop(); }
 
         function drawCar(ctx, x, y, color) {
             drawGlow(ctx, x+4, y, 12, 30, color);
@@ -333,14 +327,9 @@
             if(!rRun) return;
             rCtx.fillStyle="#050508"; rCtx.fillRect(0,0,240,200);
             
-            // Звезды скорости
             if(Math.random()<0.3) stars.push({x:Math.random()*240, y:0, s:Math.random()*3+2});
             rCtx.fillStyle = "rgba(255,255,255,0.5)";
-            for(let i=stars.length-1; i>=0; i--) {
-                stars[i].y += (rBoost ? stars[i].s*2 : stars[i].s);
-                rCtx.fillRect(stars[i].x, stars[i].y, 1, 4);
-                if(stars[i].y>200) stars.splice(i,1);
-            }
+            for(let i=stars.length-1; i>=0; i--) { stars[i].y += (rBoost ? stars[i].s*2 : stars[i].s); rCtx.fillRect(stars[i].x, stars[i].y, 1, 4); if(stars[i].y>200) stars.splice(i,1); }
 
             drawGlow(rCtx, 118, (performance.now()/20)%200, 4, 40, "#333");
             
@@ -354,7 +343,7 @@
                 if(rX < o.x+20 && rX+20 > o.x && 150 < o.y+30 && 180 > o.y) {
                     sndHit(); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
                     rObs.splice(i, 1); rLives--; updateRLives();
-                    if(rLives<=0) { rRun=false; document.getElementById('ov-race').style.display='flex'; document.getElementById('msg-race').innerHTML='<span style="color:#ff0055">CRASHED!</span>'; return; }
+                    if(rLives<=0) { rRun=false; stopMusic(); document.getElementById('ov-race').style.display='flex'; document.getElementById('msg-race').innerHTML='<span style="color:#ff0055">CRASHED!</span>'; return; }
                 } else if(o.y>200) rObs.splice(i, 1);
             }
 
@@ -366,12 +355,12 @@
             requestAnimationFrame(rLoop);
         }
 
-        // === ИГРА: ТАНЧИКИ (СЕТКА И ЗВУКИ) ===
+        // === ИГРА: ТАНЧИКИ ===
         const tc = document.getElementById('tankCanvas'), tCtx = tc.getContext('2d');
         let tRun=false, tIn=null, pT={x:110, y:200, d:'U'}, bulls=[], walls=[], bots=[], tLives=3;
 
         function updateTLives() { document.getElementById('hp-tank').innerText = 'HP: ' + tLives; }
-        function startTank() { initBGM(); document.getElementById('ov-tank').style.display='none'; tRun=true; tLives=3; updateTLives(); tSpawn(); tLoop(); }
+        function startTank() { document.getElementById('ov-tank').style.display='none'; tRun=true; tLives=3; updateTLives(); tSpawn(); startMusic(); tLoop(); }
         function tFire() { if(bulls.filter(b=>b.own).length < 2) { sndShoot(); bulls.push({x:pT.x+8, y:pT.y+8, d:pT.d, own:true}); } }
 
         function drawT(ctx, x, y, d, c) {
@@ -386,7 +375,7 @@
         function tHit() {
             sndHit(); if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
             tLives--; updateTLives();
-            if(tLives<=0) { tRun=false; document.getElementById('ov-tank').style.display='flex'; document.getElementById('msg-tank').innerHTML='<span style="color:#ff0055">FAILED</span>'; } 
+            if(tLives<=0) { tRun=false; stopMusic(); document.getElementById('ov-tank').style.display='flex'; document.getElementById('msg-tank').innerHTML='<span style="color:#ff0055">FAILED</span>'; } 
             else { pT.x=110; pT.y=200; pT.d='U'; }
         }
 
@@ -394,7 +383,6 @@
             if(!tRun) return;
             tCtx.fillStyle="#050508"; tCtx.fillRect(0,0,240,240);
             
-            // Тактическая сетка
             tCtx.strokeStyle = "rgba(255, 174, 0, 0.05)"; tCtx.lineWidth = 1;
             for(let i=0; i<240; i+=20) { tCtx.beginPath(); tCtx.moveTo(i,0); tCtx.lineTo(i,240); tCtx.moveTo(0,i); tCtx.lineTo(240,i); tCtx.stroke(); }
 
