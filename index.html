@@ -3,151 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Volt Token</title>
+    <title>Volt Token Presale</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
         body {
-            background: radial-gradient(circle at center, #2a2a35 0%, #101014 100%);
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d0d0f;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
         }
-        .header {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            letter-spacing: 2px;
+        .card {
+            background: #16161a;
+            border: 1px solid #2a2a30;
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .score-container {
-            font-size: 56px;
+        .badge {
+            background: rgba(255, 140, 0, 0.2);
+            color: #ff8c00;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 12px;
             font-weight: bold;
-            margin-bottom: 50px;
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            display: inline-block;
+            margin-bottom: 15px;
         }
-        #battery-button {
-            width: 220px;
-            height: 220px;
-            background: linear-gradient(135deg, #ffdd00, #ff8c00);
-            border-radius: 50%;
-            border: 6px solid #fff;
-            box-shadow: 0 0 50px rgba(255, 140, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.6);
-            font-size: 80px;
-            cursor: pointer;
+        h1 { font-size: 24px; margin: 10px 0; }
+        .price-box {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.05s;
-            position: relative;
-            -webkit-tap-highlight-color: transparent; 
+            justify-content: space-between;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #aaa;
         }
-        #battery-button:active {
-            transform: scale(0.92);
-            box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
+        .price-value { color: #fff; font-size: 18px; font-weight: bold; }
+        
+        /* Прогресс-бар как в Blazpay */
+        .progress-container {
+            background: #25252b;
+            height: 12px;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
         }
-        .floating-number {
-            position: absolute;
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffffff;
-            pointer-events: none;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 10;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-120px) scale(1.5); }
+        .progress-bar {
+            background: linear-gradient(90deg, #ff8c00, #ffdd00);
+            height: 100%;
+            width: 75%; /* Управляем процентом сборов */
+            box-shadow: 0 0 15px #ff8c00;
         }
         
-        /* Стили для индикатора загрузки (чтобы было видно, что игра коннектится к серверу) */
-        #loading-status {
+        .stats {
+            display: flex;
+            justify-content: space-between;
             font-size: 14px;
-            color: #aaaaaa;
-            margin-top: 20px;
-            height: 20px;
+            margin-bottom: 30px;
         }
+
+        .buy-btn {
+            background: linear-gradient(135deg, #ff8c00, #ffdd00);
+            color: #000;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .buy-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-    <div class="header">VOLT TOKEN</div>
-    
-    <div class="score-container">
-        <span id="energy-count">0</span>
-    </div>
+    <div class="card">
+        <div class="badge">PRESALE IS LIVE</div>
+        <h1>Volt Token ⚡</h1>
+        <p style="color: #888; font-size: 14px;">Supercharged by AI, Unleashed by Volt Engine.</p>
 
-    <div id="battery-button">⚡️</div>
-    
-    <div id="loading-status">Синхронизация с сервером...</div>
+        <div class="price-box">
+            <div>Current Price<br><span class="price-value">$0.0025</span></div>
+            <div style="text-align: right;">Next Phase<br><span class="price-value">$0.0050</span></div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        
+        <div class="stats">
+            <span>75% Complete</span>
+            <span>Raised: $185,400</span>
+        </div>
+
+        <button class="buy-btn" onclick="buyTokens()">Buy VOLT Now</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        let energyCount = document.getElementById('energy-count');
-        let batteryBtn = document.getElementById('battery-button');
-        let statusText = document.getElementById('loading-status');
-        
-        let currentEnergy = 0;
-        let isDataLoaded = false; 
 
-        // 1. ЗАГРУЗКА БАЛАНСА ПРИ ОТКРЫТИИ ИГРЫ
-        // Обращаемся к облаку Телеграма за сохраненными монетами
-        tg.CloudStorage.getItem('volt_score', (err, value) => {
-            if (!err && value) {
-                currentEnergy = parseInt(value); // Переводим текст в число
-                energyCount.innerText = currentEnergy;
-            }
-            isDataLoaded = true; // Разрешаем тапать только после проверки баланса
-            statusText.innerText = "Готово!";
-            setTimeout(() => statusText.innerText = "", 2000); // Прячем надпись через 2 сек
-        });
-
-        // 2. ЛОГИКА ТАПОВ
-        batteryBtn.addEventListener('pointerdown', (e) => {
-            if (!isDataLoaded) return; // Защита от накрутки до загрузки базы
-
-            currentEnergy += 1;
-            energyCount.innerText = currentEnergy;
-            tg.HapticFeedback.impactOccurred('medium');
-
-            const plusOne = document.createElement('div');
-            plusOne.classList.add('floating-number');
-            plusOne.innerText = '+1';
-            
-            const rect = batteryBtn.getBoundingClientRect();
-            plusOne.style.left = `${e.clientX - rect.left}px`;
-            plusOne.style.top = `${e.clientY - rect.top}px`;
-            
-            batteryBtn.appendChild(plusOne);
-
-            setTimeout(() => {
-                plusOne.remove();
-            }, 800);
-        });
-
-        // 3. АВТОСОХРАНЕНИЕ В ОБЛАКО
-        // Сохраняем баланс каждые 3 секунды. 
-        // Не делаем это при каждом тапе, чтобы Телеграм не заблокировал нас за спам запросами!
-        setInterval(() => {
-            if (isDataLoaded) {
-                // В облако можно сохранять только текст (строки), поэтому переводим число в строку
-                tg.CloudStorage.setItem('volt_score', currentEnergy.toString());
-            }
-        }, 3000);
-
-        tg.ready();
+        function buyTokens() {
+            // Здесь мы будем вызывать окно оплаты
+            tg.showPopup({
+                title: 'Покупка VOLT',
+                message: 'Выберите метод оплаты (USDT TRC20)',
+                buttons: [{text: 'Оплатить', type: 'default'}]
+            });
+            tg.HapticFeedback.notificationOccurred('success');
+        }
     </script>
 </body>
 </html>
