@@ -1,124 +1,161 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Volt Token Presale</title>
+    <title>Volt Token | Official Presale</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #0d0d0f;
-            color: #fff;
+            background: #08080a;
+            color: #ffffff;
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
-        .card {
-            background: #16161a;
-            border: 1px solid #2a2a30;
-            border-radius: 20px;
-            padding: 25px;
+        .container {
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 420px;
+            background: #121216;
+            border: 1px solid #222228;
+            border-radius: 24px;
+            padding: 24px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
         .badge {
-            background: rgba(255, 140, 0, 0.2);
-            color: #ff8c00;
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: bold;
+            background: rgba(255, 174, 0, 0.1);
+            color: #ffae00;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             display: inline-block;
-            margin-bottom: 15px;
+            border: 1px solid rgba(255,174,0,0.2);
         }
-        h1 { font-size: 24px; margin: 10px 0; }
-        .price-box {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #aaa;
-        }
-        .price-value { color: #fff; font-size: 18px; font-weight: bold; }
+        h1 { font-size: 28px; margin: 15px 0 5px 0; font-weight: 900; }
+        .description { color: #888; font-size: 14px; margin-bottom: 25px; }
         
-        /* Прогресс-бар как в Blazpay */
-        .progress-container {
-            background: #25252b;
-            height: 12px;
-            border-radius: 10px;
-            margin: 15px 0;
-            overflow: hidden;
+        /* Presale Stats */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
         }
-        .progress-bar {
-            background: linear-gradient(90deg, #ff8c00, #ffdd00);
-            height: 100%;
-            width: 75%; /* Управляем процентом сборов */
-            box-shadow: 0 0 15px #ff8c00;
+        .info-item {
+            background: #1a1a20;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #2a2a30;
         }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 30px;
+        .info-label { color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
+        .info-value { font-size: 18px; font-weight: 700; color: #ffae00; }
+
+        /* Progress Bar */
+        .progress-section { margin-bottom: 30px; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: #aaa; }
+        .progress-bg { background: #25252b; height: 10px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { 
+            background: linear-gradient(90deg, #ff8c00, #ffae00); 
+            height: 100%; 
+            width: 90.3%; /* Current progress */
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
         }
 
-        .buy-btn {
-            background: linear-gradient(135deg, #ff8c00, #ffdd00);
-            color: #000;
+        .buy-button {
+            background: #ffffff;
+            color: #000000;
             border: none;
             width: 100%;
             padding: 18px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
+            text-transform: uppercase;
         }
-        .buy-btn:active { transform: scale(0.98); }
+        .buy-button:active { transform: scale(0.97); background: #eeeeee; }
+
+        /* Wallet Section (Hidden by default) */
+        #payment-modal {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #2a2a30;
+            text-align: center;
+        }
+        .wallet-address {
+            background: #000;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+            border: 1px dashed #444;
+            color: #00ffaa;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="badge">PRESALE IS LIVE</div>
+    <div class="container">
+        <div class="badge">Live: Phase 8</div>
         <h1>Volt Token ⚡</h1>
-        <p style="color: #888; font-size: 14px;">Supercharged by AI, Unleashed by Volt Engine.</p>
+        <div class="description">Supercharged by AI, Unleashed by Volt Engine. Join the future of DeFi.</div>
 
-        <div class="price-box">
-            <div>Current Price<br><span class="price-value">$0.0025</span></div>
-            <div style="text-align: right;">Next Phase<br><span class="price-value">$0.0050</span></div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Price</div>
+                <div class="info-value">$0.0205</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Raised</div>
+                <div class="info-value">$2.50M</div>
+            </div>
         </div>
 
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
-        
-        <div class="stats">
-            <span>75% Complete</span>
-            <span>Raised: $185,400</span>
+        <div class="progress-section">
+            <div class="progress-header">
+                <span>90.3% Complete</span>
+                <span>Goal: $2.75M</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill"></div>
+            </div>
         </div>
 
-        <button class="buy-btn" onclick="buyTokens()">Buy VOLT Now</button>
+        <button class="buy-button" onclick="showPayment()">Join Presale</button>
+
+        <div id="payment-modal">
+            <div class="info-label">Send USDT (BEP20) to:</div>
+            <div class="wallet-address" id="wallet">0x4332...0d174</div>
+            <div style="font-size: 10px; color: #666;">Minimum purchase: 10 USDT</div>
+        </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.headerColor = '#08080a';
 
-        function buyTokens() {
-            // Здесь мы будем вызывать окно оплаты
-            tg.showPopup({
-                title: 'Покупка VOLT',
-                message: 'Выберите метод оплаты (USDT TRC20)',
-                buttons: [{text: 'Оплатить', type: 'default'}]
-            });
+        function showPayment() {
+            document.getElementById('payment-modal').style.display = 'block';
             tg.HapticFeedback.notificationOccurred('success');
+            // Scroll to bottom
+            window.scrollTo(0, document.body.scrollHeight);
         }
+
+        tg.ready();
     </script>
 </body>
 </html>
