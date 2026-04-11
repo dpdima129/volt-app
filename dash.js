@@ -1,4 +1,4 @@
-// === VOLT DASH: ULTIMATE GEOMETRY DASH ENGINE ===
+// === VOLT DASH: BALANCED PLATFORMER ENGINE ===
 
 window.dRun = false;
 let dLives = 3;
@@ -9,16 +9,16 @@ let ghostTrail = [];
 let mapIdx = 0;
 let passedObsCount = 0;
 let dFrames = 0;
-let nextSpawnDist = 150; // Увеличенная дистанция на старте
+let nextSpawnDist = 200; // Даем много места на старте
 let bgScroll = 0;
 let gridOffset = 0;
 let shakeTime = 0;
 
-// === ФИЗИКА УРОВНЯ AAA ===
-const SPEED = 4.8;         // Оптимальная скорость
-const JUMP_FORCE = -10.5;  // Резкий прыжок
+// === ИДЕАЛЬНЫЙ БАЛАНС (ЗАМЕДЛЕННЫЙ) ===
+const SPEED = 3.8;         // Замедлили скроллинг!
+const JUMP_FORCE = -9.5;   // Прыжок
 const ORB_FORCE = -10.0;   // Прыжок от орба
-const GRAVITY = 0.85;      // Тяжелая гравитация
+const GRAVITY = 0.65;      // Ослабили гравитацию, чтобы прыжок был длиннее
 
 const maps = [
     { bg: "#050510", grid: "rgba(0, 255, 255, 0.1)", line: "#00ffff", ground: "#001122", cubeM: "#00ffff", cubeI: "#0088ff", spike: "#ff0055", block: "#002244" },
@@ -26,23 +26,19 @@ const maps = [
     { bg: "#001005", grid: "rgba(0, 255, 170, 0.1)", line: "#00ffaa", ground: "#002211", cubeM: "#ff00aa", cubeI: "#880055", spike: "#00ffaa", block: "#003311" }
 ];
 
+// ПАТТЕРНЫ (Проходимые, широкие куски)
 const chunks = [
-    { w: 180, obs: [{t:'spike', x:0, y:120}] }, 
-    { w: 220, obs: [{t:'spike', x:0, y:120}, {t:'spike', x:25, y:120}] }, 
-    { w: 280, obs: [{t:'spike', x:0, y:120}, {t:'spike', x:25, y:120}, {t:'spike', x:50, y:120}] }, 
-    { w: 280, obs: [{t:'pit', x:0, w:120}, {t:'orb', x:60, y:60}] }, 
-    { w: 350, obs: [ 
-        {t:'block', x:0, y:90, w:50, h:30}, 
-        {t:'block', x:50, y:60, w:50, h:60}, 
-        {t:'spike', x:50, y:40}
+    { w: 150, obs: [{t:'spike', x:0, y:120}] }, // Просто 1 шип
+    { w: 200, obs: [{t:'spike', x:0, y:120}, {t:'spike', x:30, y:120}] }, // 2 шипа с промежутком
+    { w: 250, obs: [{t:'pit', x:0, w:90}] }, // Небольшая, проходимая яма
+    { w: 300, obs: [{t:'pit', x:0, w:120}, {t:'orb', x:60, y:65}] }, // Яма с орбом для спасения
+    { w: 350, obs: [ // Понятная лесенка
+        {t:'block', x:0, y:90, w:80, h:30}, 
+        {t:'block', x:120, y:60, w:80, h:60}
     ]},
-    { w: 300, obs: [ 
-        {t:'spike', x:0, y:120},
-        {t:'block', x:80, y:80, w:100, h:20}
-    ]},
-    { w: 280, obs: [ 
-        {t:'pit', x:0, w:150},
-        {t:'block', x:50, y:90, w:50, h:30}
+    { w: 300, obs: [ // Парящая платформа над шипами
+        {t:'spike', x:20, y:120}, {t:'spike', x:50, y:120},
+        {t:'block', x:10, y:70, w:100, h:20}
     ]}
 ];
 
@@ -52,14 +48,14 @@ function updateDLives() {
 }
 
 window.startDash = function() {
-    if(window.dRun) return; // Защита от случайного дабл-клика
+    if(window.dRun) return; 
     const ov = document.getElementById('ov-dash');
     if(ov) ov.style.display = 'none';
     
     window.dRun = true;
     pD.x = 50; pD.y = 120; pD.vy = 0; pD.rot = 0; pD.isGrounded = true;
     dObs = []; particles = []; ghostTrail = [];
-    dLives = 3; mapIdx = 0; passedObsCount = 0; dFrames = 0; nextSpawnDist = 150; shakeTime = 0;
+    dLives = 3; mapIdx = 0; passedObsCount = 0; dFrames = 0; nextSpawnDist = 200; shakeTime = 0;
     
     updateDLives();
     
@@ -76,7 +72,6 @@ window.dashJump = function(e) {
 
     let hitOrb = false;
     
-    // Проверка орбов (окно захвата увеличено до 70 пикселей)
     for(let i=0; i<dObs.length; i++) {
         let ob = dObs[i];
         if(ob.t === 'orb' && !ob.used) {
@@ -127,7 +122,6 @@ function createParts(x, y, color, count, speed=5) {
     }
 }
 
-// ФИКС КРАША: Полный сброс карты при смерти
 function die() {
     if(typeof window.sndHit === 'function') window.sndHit();
     createParts(pD.x+10, pD.y+10, maps[mapIdx].cubeM, 60, 10); 
@@ -142,10 +136,9 @@ function die() {
         document.getElementById('ov-dash').style.display='flex';
         document.getElementById('msg-dash').innerHTML = '<span style="color:#ff0055">WASTED</span><br><br><span style="font-size:8px;color:#aaa">TAP TO RETRY</span>';
     } else {
-        // Очищаем ВЕСЬ массив препятствий, чтобы не было лупа смертей
         dObs = [];
-        nextSpawnDist = 150; // Даем игроку место для разгона
-        pD.y = -20; // Сбрасываем куб с неба
+        nextSpawnDist = 200; // Даем много времени на передышку после смерти
+        pD.y = -20; 
         pD.vy = 0; pD.x = 50; pD.rot = 0;
         ghostTrail = []; 
     }
@@ -182,7 +175,6 @@ function dLoop() {
     
     dFrames++;
 
-    // 1. ОЧИСТКА ЭКРАНА
     ctx.fillStyle = curMap.bg;
     ctx.fillRect(0, 0, 300, 150);
 
@@ -192,7 +184,6 @@ function dLoop() {
         shakeTime--;
     }
 
-    // 2. ВИЗУАЛ (Сетка и текст)
     let pulse = 0.5 + Math.sin(dFrames * 0.1) * 0.2;
     ctx.fillStyle = curMap.block; ctx.globalAlpha = pulse * 0.2;
     ctx.fillRect(0, 0, 300, 150); ctx.globalAlpha = 1.0;
@@ -209,12 +200,11 @@ function dLoop() {
     ctx.fillText("VOLT AI ⚡️", bgScroll + 50, 90);
     ctx.fillText("VOLT AI ⚡️", bgScroll + 450, 90);
 
-    // 3. ПОЛ
     ctx.fillStyle = curMap.ground; ctx.fillRect(0, 140, 300, 10);
     ctx.fillStyle = curMap.line; ctx.shadowBlur = 10; ctx.shadowColor = curMap.line;
     ctx.fillRect(0, 138, 300, 2); ctx.shadowBlur = 0;
 
-    // 4. ГЕНЕРАЦИЯ ОБЪЕКТОВ
+    // ГЕНЕРАЦИЯ ОБЪЕКТОВ С ПЕРЕДЫШКОЙ
     nextSpawnDist -= SPEED;
     if(nextSpawnDist <= 0) {
         let chunk = chunks[Math.floor(Math.random() * chunks.length)];
@@ -222,17 +212,16 @@ function dLoop() {
         chunk.obs.forEach(obj => {
             dObs.push({ t: obj.t, x: startX + obj.x, y: obj.y, w: obj.w, h: obj.h, passed: false, used: false });
         });
-        nextSpawnDist = chunk.w; 
+        // Добавляем 120 пикселей гарантированной пустой земли после каждого чанка!
+        nextSpawnDist = chunk.w + 120; 
     }
 
-    // 5. ГРАВИТАЦИЯ
     pD.vy += GRAVITY;
     pD.y += pD.vy;
     
     let targetGround = 120; 
     let onPlatform = false;
 
-    // 6. ПРОВЕРКА СТОЛКНОВЕНИЙ (БРОНЕБОЙНАЯ ЛОГИКА)
     for(let i = dObs.length - 1; i >= 0; i--) {
         let ob = dObs[i]; 
         ob.x -= SPEED; 
@@ -240,6 +229,7 @@ function dLoop() {
         if(ob.t === 'pit') {
             ctx.fillStyle = curMap.bg; 
             ctx.fillRect(ob.x, 138, ob.w, 12); 
+            // Куб проваливается только если он полностью над ямой
             if(pD.x + 10 > ob.x && pD.x + 10 < ob.x + ob.w && !onPlatform) {
                 targetGround = 200; 
             }
@@ -249,16 +239,12 @@ function dLoop() {
             ctx.fillStyle = curMap.block; ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
             ctx.strokeStyle = curMap.line; ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
             
-            // Приземление сверху
             if(pD.vy >= 0 && pD.y + 20 >= ob.y && pD.y + 20 - pD.vy <= ob.y + 12 && pD.x + 16 > ob.x && pD.x + 4 < ob.x + ob.w) {
                 targetGround = ob.y - 20;
                 onPlatform = true;
             }
-            // Удар в бок
             else if(pD.x + 18 > ob.x && pD.x + 2 < ob.x + ob.w && pD.y + 18 > ob.y && pD.y + 2 < ob.y + ob.h) {
-                die(); 
-                if(!window.dRun) return;
-                break; 
+                die(); if(!window.dRun) return; break; 
             }
         }
 
@@ -266,12 +252,9 @@ function dLoop() {
             ctx.fillStyle = curMap.spike; ctx.shadowBlur = 10; ctx.shadowColor = curMap.spike;
             ctx.beginPath(); ctx.moveTo(ob.x, ob.y+20); ctx.lineTo(ob.x+10, ob.y); ctx.lineTo(ob.x+20, ob.y+20); ctx.fill(); ctx.shadowBlur = 0;
             
-            // Прощающий хитбокс шипа (ужато до центра острия)
             let sLeft = ob.x + 8, sRight = ob.x + 12, sTop = ob.y + 10, sBot = ob.y + 20;
             if(pD.x + 16 > sLeft && pD.x + 4 < sRight && pD.y + 16 > sTop && pD.y + 4 < sBot) {
-                die(); 
-                if(!window.dRun) return;
-                break; 
+                die(); if(!window.dRun) return; break; 
             }
         }
 
@@ -293,7 +276,6 @@ function dLoop() {
         if(ob.x < -150) dObs.splice(i, 1); 
     }
 
-    // 7. ОБРАБОТКА ПРИЗЕМЛЕНИЯ
     if(pD.y >= targetGround) {
         pD.y = targetGround;
         pD.vy = 0;
@@ -306,10 +288,9 @@ function dLoop() {
         } 
     } else {
         pD.isGrounded = false;
-        pD.rot += 0.15; 
+        pD.rot += 0.12; // Вращение замедлено под новую физику
     }
 
-    // 8. ОТРИСОВКА КУБИКА И ШЛЕЙФА
     if(dLives > 0) {
         if(!pD.isGrounded) {
             ghostTrail.push({x: pD.x, y: pD.y, rot: pD.rot});
@@ -325,7 +306,6 @@ function dLoop() {
         drawGDCube(ctx, pD.x, pD.y, 20, pD.rot, curMap.cubeM, curMap.cubeI, 1.0);
     }
 
-    // 9. ЧАСТИЦЫ
     for(let i=particles.length-1; i>=0; i--) {
         let p = particles[i];
         p.x += p.vx; p.y += p.vy; p.life -= 0.05;
