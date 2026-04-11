@@ -1,4 +1,4 @@
-// === VOLT DASH 2.0 ENGINE (GEOMETRY DASH CLONE) ===
+// === VOLT DASH 2.0 ENGINE ===
 
 window.dRun = false;
 let dLives = 3;
@@ -12,6 +12,13 @@ let dFrames = 0;
 let bgPulse = 0;
 let groundScroll = 0;
 let shakeTime = 0;
+let nextSpawnDist = 50;
+
+// === НАСТРОЙКА БАЛАНСА ===
+const SPEED = 4.2; // Замедлили игру для комфорта (было 5.5)
+const JUMP_FORCE = -8.2; // Сила прыжка с земли
+const ORB_FORCE = -8.0; // Сила прыжка от желтого кольца
+const GRAVITY = 0.55; // Ослабленная гравитация для плавности
 
 // Цветовые схемы карт (Cyber, Magma, Quantum)
 const maps = [
@@ -20,13 +27,13 @@ const maps = [
     { bg: "#001100", line: "#00ffaa", g1: "#008844", g2: "#005522", cubeMain: "#ff00aa", cubeInner: "#880055", spike: "#00ffaa", spikeIn: "#ccffff" }
 ];
 
-// Паттерны уровней (для умной генерации)
+// УМНЫЕ ПАТТЕРНЫ (Исключают непроходимость)
 const patterns = [
-    [{ type: 'spike', dx: 0, y: 120 }], // Одиночный
-    [{ type: 'spike', dx: 0, y: 120 }, { type: 'spike', dx: 20, y: 120 }], // Двойной
-    [{ type: 'spike', dx: 0, y: 120 }, { type: 'spike', dx: 20, y: 120 }, { type: 'spike', dx: 40, y: 120 }], // Тройной (нужен идеальный тайминг)
-    [{ type: 'spike', dx: 0, y: 120 }, { type: 'orb', dx: 30, y: 80 }, { type: 'spike', dx: 60, y: 120 }], // Яма с шипами и орбом в воздухе
-    [{ type: 'orb', dx: 0, y: 90 }] // Просто орб
+    { elems: [{ type: 'spike', dx: 0, y: 120 }], dist: 160 }, // Одиночный шип
+    { elems: [{ type: 'spike', dx: 0, y: 120 }, { type: 'spike', dx: 20, y: 120 }], dist: 190 }, // Двойной шип
+    { elems: [{ type: 'spike', dx: 0, y: 120 }, { type: 'orb', dx: 45, y: 75 }, { type: 'spike', dx: 90, y: 120 }], dist: 230 }, // Шип -> Орб -> Шип
+    { elems: [{ type: 'orb', dx: 0, y: 80 }], dist: 140 }, // Просто орб в воздухе
+    { elems: [{ type: 'spike', dx: 0, y: 120 }, { type: 'spike', dx: 20, y: 120 }, { type: 'orb', dx: 60, y: 65 }], dist: 210 } // Двойной шип -> спасение на орбе
 ];
 
 function updateDLives() { 
@@ -40,7 +47,7 @@ window.startDash = function() {
     window.dRun = true;
     pD.y = 120; pD.vy = 0; pD.rot = 0;
     dObs = []; trails = []; particles = [];
-    dLives = 3; mapIdx = 0; passedObsCount = 0; dFrames = 0; shakeTime = 0;
+    dLives = 3; mapIdx = 0; passedObsCount = 0; dFrames = 0; shakeTime = 0; nextSpawnDist = 100;
     updateDLives();
     if(typeof window.startMusic === 'function') window.startMusic();
     dLoop();
@@ -49,18 +56,18 @@ window.startDash = function() {
 window.dashJump = function() {
     if(!window.dRun) return;
 
-    // 1. Проверяем, летим ли мы через желтый ОРБ (Jump Ring)
     let hitOrb = false;
+    
+    // 1. Проверяем желтые орбы вокруг кубика
     for(let i=0; i<dObs.length; i++) {
         let ob = dObs[i];
         if(ob.type === 'orb' && !ob.used) {
-            let distX = Math.abs((pD.x + 10) - (ob.x + 10));
-            let distY = Math.abs((pD.y + 10) - (ob.y + 10));
-            if(distX < 25 && distY < 30) {
-                pD.vy = -10; // Мощный прыжок от орба
+            // Если орб находится в пределах досягаемости и кубик оторван от земли
+            if(ob.x > 10 && ob.x < 90 && pD.y < 115) { 
+                pD.vy = ORB_FORCE; // Прыжок от орба
                 ob.used = true;
                 hitOrb = true;
-                createParticles(ob.x+10, ob.y+10, "#ffff00", 20, 5);
+                createParticles(ob.x+10, ob.y+10, "#ffff00", 25, 6); // Взрыв орба
                 if(typeof window.sndJump === 'function') window.sndJump();
                 if(window.tg && window.tg.HapticFeedback) window.tg.HapticFeedback.impactOccurred('heavy');
                 break;
@@ -68,11 +75,11 @@ window.dashJump = function() {
         }
     }
 
-    // 2. Если не орб, проверяем обычный прыжок от земли
+    // 2. Если орба нет, делаем обычный прыжок с земли
     if(!hitOrb && pD.y >= 120) {
-        pD.vy = -9.5; // Резкий прыжок GD
+        pD.vy = JUMP_FORCE; 
         if(typeof window.sndJump === 'function') window.sndJump();
-        createParticles(pD.x + 10, pD.y + 20, maps[mapIdx].cubeMain, 8, 2);
+        createParticles(pD.x + 10, pD.y + 20, maps[mapIdx].cubeMain, 10, 2); // Пыль из-под куба
         if(window.tg && window.tg.HapticFeedback) window.tg.HapticFeedback.impactOccurred('medium');
     }
 };
@@ -101,23 +108,23 @@ function createParticles(x, y, color, count, speed=4) {
     }
 }
 
-// Отрисовка правильного GD Кубика
+// Отрисовка 2.5D Кубика
 function drawGDCube(ctx, x, y, size, rot, cMain, cInner) {
     ctx.save();
     ctx.translate(x + size/2, y + size/2);
     ctx.rotate(rot);
     
-    // Внешняя толстая рамка
+    // Внешнее свечение
     ctx.fillStyle = cMain;
     ctx.shadowBlur = 15; ctx.shadowColor = cMain;
     ctx.fillRect(-size/2, -size/2, size, size);
     
-    // Внутренняя часть (Лицо кубика)
+    // Внутренняя часть
     ctx.shadowBlur = 0;
     ctx.fillStyle = cInner;
     ctx.fillRect(-size/2 + 3, -size/2 + 3, size - 6, size - 6);
     
-    // Глаза
+    // Глаза кубика
     ctx.fillStyle = "#fff";
     ctx.fillRect(-size/2 + 5, -size/2 + 5, 4, 4);
     ctx.fillRect(-size/2 + 11, -size/2 + 5, 4, 4);
@@ -138,7 +145,7 @@ function drawGDSpike(ctx, x, y, cMain, cInner) {
 function drawOrb(ctx, x, y, used) {
     if(used) return;
     ctx.beginPath();
-    ctx.arc(x+10, y+10, 8 + Math.sin(dFrames*0.2)*2, 0, Math.PI*2); // Пульсация
+    ctx.arc(x+10, y+10, 8 + Math.sin(dFrames*0.2)*2, 0, Math.PI*2);
     ctx.fillStyle = "#ffff00";
     ctx.shadowBlur = 15; ctx.shadowColor = "#ffff00";
     ctx.fill();
@@ -158,11 +165,10 @@ function dLoop() {
     if(!dc) return;
     const ctx = dc.getContext('2d');
     const curMap = maps[mapIdx];
-    const speed = 5.5; // Скорость игры
     
     dFrames++;
 
-    // Screen Shake Effect
+    // Тряска экрана (Screen Shake)
     ctx.save();
     if(shakeTime > 0) {
         let dx = (Math.random()-0.5)*8; let dy = (Math.random()-0.5)*8;
@@ -177,41 +183,38 @@ function dLoop() {
     ctx.fillStyle = curMap.g1; ctx.globalAlpha = bgPulse * 0.3;
     ctx.fillRect(0, 0, 300, 150); ctx.globalAlpha = 1.0;
 
-    // Параллакс: Фоновый текст "VOLT AI ⚡️"
-    let textScroll = -(dFrames * 0.5) % 400;
+    // Параллакс "VOLT AI"
+    let textScroll = -(dFrames * 0.4) % 400;
     ctx.font = "900 40px 'Inter', sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.03)";
+    ctx.fillStyle = "rgba(255,255,255,0.04)";
     ctx.fillText("VOLT AI ⚡️", textScroll + 50, 90);
     ctx.fillText("VOLT AI ⚡️", textScroll + 450, 90);
 
-    // 2. ИКОНИЧЕСКИЙ ПОЛ GD
-    groundScroll -= speed;
+    // 2. ДВИЖЕНИЕ ПОЛА
+    groundScroll -= SPEED;
     if(groundScroll <= -40) groundScroll = 0;
     
     ctx.fillStyle = curMap.g2;
     ctx.fillRect(0, 140, 300, 10);
-    // Диагональные полосы на полу
     ctx.fillStyle = curMap.g1;
     for(let i = -40; i < 340; i += 40) {
         ctx.beginPath(); ctx.moveTo(i + groundScroll, 150); ctx.lineTo(i + 20 + groundScroll, 150);
         ctx.lineTo(i + 30 + groundScroll, 140); ctx.lineTo(i + 10 + groundScroll, 140); ctx.fill();
     }
-    // Толстая неоновая линия раздела
     ctx.fillStyle = curMap.line;
     ctx.shadowBlur = 10; ctx.shadowColor = curMap.line;
     ctx.fillRect(0, 138, 300, 2);
     ctx.shadowBlur = 0;
 
-    // 3. ФИЗИКА И ВРАЩЕНИЕ
-    pD.vy += 0.8; // Тяжелая гравитация
+    // 3. ФИЗИКА И ГРАВИТАЦИЯ
+    pD.vy += GRAVITY; 
     pD.y += pD.vy; 
     
     if(pD.y > 120) { 
         pD.y = 120; pD.vy = 0; 
-        // Жесткое выравнивание куба при приземлении (Snap to 90 degrees)
-        pD.rot = Math.round(pD.rot / (Math.PI/2)) * (Math.PI/2); 
+        pD.rot = Math.round(pD.rot / (Math.PI/2)) * (Math.PI/2); // Магнитное выравнивание
     } else {
-        pD.rot += 0.15; // Быстрое вращение в воздухе
+        pD.rot += 0.12; // Вращение
     }
 
     // Трейл
@@ -224,29 +227,29 @@ function dLoop() {
     });
     ctx.globalAlpha = 1.0;
 
-    // 4. ГЕНЕРАЦИЯ УРОВНЯ
-    if(dObs.length === 0 || dObs[dObs.length-1].x < 100) {
-        if(Math.random() < 0.05) { // Шанс заспавнить паттерн
-            let pat = patterns[Math.floor(Math.random() * patterns.length)];
-            let startX = 320;
-            pat.forEach(obj => {
-                dObs.push({ type: obj.type, x: startX + obj.dx, y: obj.y, passed: false, used: false });
-            });
-        }
+    // 4. ГЕНЕРАЦИЯ УРОВНЯ ПО ПАТТЕРНАМ
+    nextSpawnDist -= SPEED;
+    if(nextSpawnDist <= 0) {
+        let pat = patterns[Math.floor(Math.random() * patterns.length)];
+        let startX = 320;
+        pat.elems.forEach(obj => {
+            dObs.push({ type: obj.type, x: startX + obj.dx, y: obj.y, passed: false, used: false });
+        });
+        nextSpawnDist = pat.dist; // Задаем расстояние до следующего блока
     }
 
-    // 5. ОТРИСОВКА И КОЛЛИЗИЯ ПРЕПЯТСТВИЙ
+    // 5. ОТРИСОВКА И КОЛЛИЗИЯ
     for(let i = dObs.length - 1; i >= 0; i--) {
         let ob = dObs[i]; 
-        ob.x -= speed; 
+        ob.x -= SPEED; 
         
         if(ob.type === 'spike') {
             drawGDSpike(ctx, ob.x, ob.y, curMap.spike, curMap.spikeIn);
-            // Жесткая коллизия с шипом
+            // Просчет коллизии шипа
             if(pD.x < ob.x + 12 && pD.x + 18 > ob.x + 8 && pD.y + 20 > ob.y + 8) {
                 if(typeof window.sndHit === 'function') window.sndHit();
                 triggerShake();
-                createParticles(pD.x+10, pD.y+10, curMap.cubeMain, 40, 8); // Мощный взрыв кубика
+                createParticles(pD.x+10, pD.y+10, curMap.cubeMain, 40, 8); 
                 if(window.tg && window.tg.HapticFeedback) window.tg.HapticFeedback.impactOccurred('heavy');
                 
                 dObs.splice(i, 1); dLives--; updateDLives();
@@ -271,17 +274,16 @@ function dLoop() {
             if(ob.type === 'spike') {
                 passedObsCount++;
                 if(typeof window.addScore === 'function') window.addScore(0.005);
-                if(passedObsCount % 15 === 0) mapIdx = (mapIdx + 1) % maps.length; // Смена цвета
+                if(passedObsCount % 15 === 0) mapIdx = (mapIdx + 1) % maps.length; // Карта меняется каждые 15 шипов
             }
         } else if(ob.x < -30) { 
             dObs.splice(i, 1); 
         }
     }
 
-    // Игрок рисуется только если жив
     if(dLives > 0) drawGDCube(ctx, pD.x, pD.y, 20, pD.rot, curMap.cubeMain, curMap.cubeInner);
 
-    // Частицы
+    // Отрисовка частиц
     for(let i=particles.length-1; i>=0; i--) {
         let p = particles[i];
         p.x += p.vx; p.y += p.vy; p.life -= 0.04;
@@ -291,7 +293,7 @@ function dLoop() {
     }
     ctx.globalAlpha = 1.0;
 
-    ctx.restore(); // Конец Screen Shake
+    ctx.restore(); // Сброс смещения (Screen Shake)
 
     if(window.dRun) requestAnimationFrame(dLoop);
 }
