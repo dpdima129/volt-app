@@ -158,6 +158,7 @@ function die() {
         dObs = dObs.filter(o => o.x > 200 || o.t === 'pit');
         pD.y = -20; // Падаем сверху при возрождении
         pD.vy = 0; pD.x = 50; pD.rot = 0;
+        ghostTrail = []; // ФИКС: Очищаем шлейф, чтобы не было бага
     }
 }
 
@@ -278,7 +279,9 @@ function dLoop() {
             }
             // Проверка: врезался ли куб в БОК блока
             else if(pD.x + 18 > ob.x && pD.x + 2 < ob.x + ob.w && pD.y + 18 > ob.y && pD.y + 2 < ob.y + ob.h) {
-                die(); if(!window.dRun) return;
+                die(); 
+                if(!window.dRun) return;
+                break; // ФИКС КРАША: прерываем цикл, массив изменен!
             }
         }
 
@@ -290,7 +293,9 @@ function dLoop() {
             // ЧЕСТНЫЙ ХИТБОКС (Суженная зона смерти)
             let sLeft = ob.x + 6, sRight = ob.x + 14, sTop = ob.y + 8, sBot = ob.y + 20;
             if(pD.x + 16 > sLeft && pD.x + 4 < sRight && pD.y + 16 > sTop && pD.y + 4 < sBot) {
-                die(); if(!window.dRun) return;
+                die(); 
+                if(!window.dRun) return;
+                break; // ФИКС КРАША: прерываем цикл!
             }
         }
 
@@ -323,7 +328,10 @@ function dLoop() {
         // Магнитное выравнивание (Snap to 90 degrees)
         pD.rot = Math.round(pD.rot / (Math.PI/2)) * (Math.PI/2); 
         
-        if(targetGround > 150) { die(); if(!window.dRun) return; } // Упал в пропасть!
+        if(targetGround > 150) { 
+            die(); 
+            if(!window.dRun) return; 
+        } 
     } else {
         pD.isGrounded = false;
         pD.rot += 0.15; // Вращение в воздухе
